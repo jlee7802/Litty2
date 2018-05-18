@@ -1,10 +1,6 @@
 package com.litty.litty2;
 
-import android.app.AlertDialog;
-import android.content.Intent;
 import android.location.Location;
-import android.app.Activity;
-import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -23,11 +19,15 @@ import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 import android.content.pm.PackageManager;
 
+import static android.os.Debug.waitForDebugger;
+
 public class MainActivity extends AppCompatActivity implements
         ConnectionCallbacks, OnConnectionFailedListener, LocationListener{
-    private FusedLocationProviderClient mFusedLocationClient;
-    protected LocationCallback mLocationCallback = new LocationCallback();
-    protected Location mCurrentLocation;
+
+    public FusedLocationProviderClient mFusedLocationClient;
+    public LocationCallback mLocationCallback = new LocationCallback();
+    public Location mCurrentLocation;
+    public LocationRequest mLocationRequest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,37 +36,35 @@ public class MainActivity extends AppCompatActivity implements
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
+        mLocationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                waitForDebugger();
+                TextView textView = findViewById(R.id.textView);
+                textView.setText(String.valueOf(99999));
+                if (locationResult == null) {
+                    return;
+                }
+                for (Location location : locationResult.getLocations()) {
+                    TextView textView2 = findViewById(R.id.textView3);
+                    textView2.setText(String.valueOf(location.getLatitude()));
+                }
+            }
+        };
+
         /*ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);*/
 
         startLocationUpdates();
     }
 
     protected void startLocationUpdates() {
-        LocationRequest mLocationRequest = new LocationRequest();
+        mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(10000);
         mLocationRequest.setFastestInterval(5000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback,null);
-
-            mLocationCallback = new LocationCallback() {
-                @Override
-                public void onLocationResult(LocationResult locationResult) {
-                    if (locationResult == null) {
-                        TextView textView = findViewById(R.id.textView);
-                        textView.setText(String.valueOf(999));
-                        return;
-                    }
-                    for (Location location : locationResult.getLocations()) {
-                        TextView textView = findViewById(R.id.textView);
-                        textView.setText(String.valueOf(99999));
-
-                        TextView textView2 = findViewById(R.id.textView3);
-                        textView2.setText(String.valueOf(location.getLatitude()));
-                    }
-                };
-            };
+            mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, null);
         }
         else {
             ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
