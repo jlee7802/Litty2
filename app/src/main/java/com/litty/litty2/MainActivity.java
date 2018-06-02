@@ -31,13 +31,6 @@ import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListe
 import com.litty.userLocationPackage.userLocation;
 import com.litty.userLocationPackage.userLocationInterface;
 
-import org.json.*;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-
 public class MainActivity extends AppCompatActivity implements
         ConnectionCallbacks, OnConnectionFailedListener, LocationListener{
 
@@ -67,13 +60,11 @@ public class MainActivity extends AppCompatActivity implements
             LocationCallback mLocationCallback = new LocationCallback() {
                 @Override
                 public void onLocationResult(LocationResult locationResult) {
-                    waitForDebugger();
+                    //waitForDebugger();
                     if (locationResult == null) {
                         return;
                     }
                     for (Location location : locationResult.getLocations()) {
-                        TextView textView = findViewById(R.id.textView3);
-                        textView.setText(String.valueOf(location.getLatitude()));
 
                         // Need to create write to aws database here by invoking lambda function to updateUserLocation
                         try {
@@ -82,24 +73,25 @@ public class MainActivity extends AppCompatActivity implements
                                     context.getApplicationContext(), "us-east-1:caa8736d-fa24-483f-bf6a-4ee5b4da1436", Regions.US_EAST_1);
 
                             // Create LambdaInvokerFactory, to be used to instantiate the Lambda proxy.
-                            LambdaInvokerFactory factory = new LambdaInvokerFactory(context.getApplicationContext(),
-                                    Regions.US_EAST_1, credentialsProvider);
+                            LambdaInvokerFactory factory = new LambdaInvokerFactory(context.getApplicationContext(), Regions.US_EAST_1, credentialsProvider);
+                            //LambdaInvokerFactory factory = LambdaInvokerFactory.build().context(context).region(Regions.US_EAST_1).credentialsProvider(credentialsProvider).build();
 
                             // Create the Lambda proxy object with default Json data binder.
                             // You can provide your own data binder by implementing
                             // LambdaDataBinder
                             final userLocationInterface userLocationInterface = factory.build(userLocationInterface.class);
 
-                            userLocation uLocation = new userLocation(String.valueOf(location.getLatitude()),String.valueOf(location.getLongitude()),""); // Need to figure out how to get user id when user logs in
+                            userLocation uLocation = new userLocation(String.valueOf(location.getLatitude()),String.valueOf(location.getLongitude()),String.valueOf(1)); // Need to figure out how to get user id when user logs in
 
                             // The Lambda function invocation results in a network call
                             // Make sure it is not called from the main thread
-                            new AsyncTask<userLocation, Void, Void>() {
+                            new AsyncTask<userLocation, Void, String>() {
                                 @Override
-                                protected Void doInBackground(userLocation... params) {
+                                protected String doInBackground(userLocation... params) {
                                     // invoke "echo" method. In case it fails, it will throw a
                                     // LambdaFunctionException.
                                     try {
+                                        waitForDebugger();
                                         return userLocationInterface.updateUserLocation(params[0]);
                                     } catch (LambdaFunctionException lfe) {
                                         Log.e("TAG", "Failed to invoke updateUserLocation", lfe);
@@ -107,8 +99,7 @@ public class MainActivity extends AppCompatActivity implements
                                     }
                                 }
 
-                                // Decide if i want to do anything after execution
-                               /* @Override
+                                @Override
                                 protected void onPostExecute(String result) {
                                     if (result == null) {
                                         return;
@@ -116,11 +107,12 @@ public class MainActivity extends AppCompatActivity implements
 
                                     // Do a toast
                                     Toast.makeText(MainActivity.this, result, Toast.LENGTH_LONG).show();
-                                }*/
+                                }
                             }.execute(uLocation);
                         }
                         catch (Exception e){
                             // Need to figure out what to do if there is an error
+                            String ee = e.getMessage();
                         }
                     }
                 }
