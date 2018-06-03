@@ -9,10 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.Manifest;
 import android.util.Log;
-import android.widget.TextView;
 import android.content.pm.PackageManager;
-import android.widget.Toast;
-
 import static android.os.Debug.waitForDebugger;
 
 import com.amazonaws.mobileconnectors.lambdainvoker.*;
@@ -31,11 +28,14 @@ import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListe
 import com.litty.userLocationPackage.userLocation;
 import com.litty.userLocationPackage.userLocationInterface;
 
+import java.lang.ref.WeakReference;
+
 public class MainActivity extends AppCompatActivity implements
         ConnectionCallbacks, OnConnectionFailedListener, LocationListener{
 
     public FusedLocationProviderClient mFusedLocationClient;
     public Location mCurrentLocation;
+    public static userLocation uLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,10 +46,10 @@ public class MainActivity extends AppCompatActivity implements
 
         /*ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);*/
 
-        startLocationUpdates(this);
+        startLocationUpdates();
     }
 
-    protected void startLocationUpdates(final Context context) {
+    protected void startLocationUpdates() {
         // If permission granted then start location update. -JL
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             LocationRequest mLocationRequest = new LocationRequest();
@@ -68,47 +68,7 @@ public class MainActivity extends AppCompatActivity implements
 
                         // Need to create write to aws database here by invoking lambda function to updateUserLocation
                         try {
-                            // Create an instance of CognitoCachingCredentialsProvider
-                            CognitoCachingCredentialsProvider credentialsProvider = new CognitoCachingCredentialsProvider(
-                                    context.getApplicationContext(), "us-east-1:caa8736d-fa24-483f-bf6a-4ee5b4da1436", Regions.US_EAST_1);
-
-                            // Create LambdaInvokerFactory, to be used to instantiate the Lambda proxy.
-                            LambdaInvokerFactory factory = new LambdaInvokerFactory(context.getApplicationContext(), Regions.US_EAST_1, credentialsProvider);
-                            //LambdaInvokerFactory factory = LambdaInvokerFactory.build().context(context).region(Regions.US_EAST_1).credentialsProvider(credentialsProvider).build();
-
-                            // Create the Lambda proxy object with default Json data binder.
-                            // You can provide your own data binder by implementing
-                            // LambdaDataBinder
-                            final userLocationInterface userLocationInterface = factory.build(userLocationInterface.class);
-
-                            userLocation uLocation = new userLocation(String.valueOf(location.getLatitude()),String.valueOf(location.getLongitude()),String.valueOf(1)); // Need to figure out how to get user id when user logs in
-
-                            // The Lambda function invocation results in a network call
-                            // Make sure it is not called from the main thread
-                            new AsyncTask<userLocation, Void, String>() {
-                                @Override
-                                protected String doInBackground(userLocation... params) {
-                                    // invoke "echo" method. In case it fails, it will throw a
-                                    // LambdaFunctionException.
-                                    try {
-                                        waitForDebugger();
-                                        return userLocationInterface.updateUserLocation(params[0]);
-                                    } catch (LambdaFunctionException lfe) {
-                                        Log.e("TAG", "Failed to invoke updateUserLocation", lfe);
-                                        return null;
-                                    }
-                                }
-
-                                @Override
-                                protected void onPostExecute(String result) {
-                                    if (result == null) {
-                                        return;
-                                    }
-
-                                    // Do a toast
-                                    Toast.makeText(MainActivity.this, result, Toast.LENGTH_LONG).show();
-                                }
-                            }.execute(uLocation);
+                            new locationTask(MainActivity.this, location).execute(uLocation);
                         }
                         catch (Exception e){
                             // Need to figure out what to do if there is an error
@@ -146,5 +106,50 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onConnectionSuspended(int cause) {
 
+    }
+
+    private static class locationTask extends AsyncTask<userLocation, Void, String>{
+        private WeakReference<MainActivity> activityReference;
+        userLocationInterface userLocationInterface;
+
+        // only retain a weak reference to the activity
+        locationTask(MainActivity context, Location location) {
+            activityReference = new WeakReference<>(context);
+
+            // Create an instance of CognitoCachingCredentialsProvider
+            CognitoCachingCredentialsProvider credentialsProvider = new CognitoCachingCredentialsProvider(
+                    context.getApplicationContext(), "us-east-1:caa8736d-fa24-483f-bf6a-4ee5b4da1436", Regions.US_EAST_1);
+
+            // Create LambdaInvokerFactory, to be used to instantiate the Lambda proxy.
+            LambdaInvokerFactory factory = new LambdaInvokerFactory(context.getApplicationContext(), Regions.US_EAST_1, credentialsProvider);
+            //LambdaInvokerFactory factory = LambdaInvokerFactory.build().context(context).region(Regions.US_EAST_1).credentialsProvider(credentialsProvider).build();
+
+            // Create the Lambda proxy object with default Json data binder.
+            // You can provide your own data binder by implementing
+            // LambdaDataBinder
+            userLocationInterface = factory.build(userLocationInterface.class);
+
+            uLocation = new userLocation(String.valueOf(location.getLatitude()),String.valueOf(location.getLongitude()),String.valueOf(1)); // Need to figure out how to get user id when user logs in
+        }
+
+        @Override
+        protected String doInBackground(userLocation... params) {
+            // invoke "echo" method. In case it fails, it will throw a
+            // LambdaFunctionException.
+            try {
+                waitForDebugger();
+                return userLocationInterface.updateUserLocation(params[0]);
+            } catch (LambdaFunctionException lfe) {
+                Log.e("TAG", "Failed to invoke updateUserLocation", lfe);
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            if (result == null) {
+                return;
+            }
+        }
     }
 }
