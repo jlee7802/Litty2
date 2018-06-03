@@ -1,9 +1,8 @@
 package com.litty.litty2;
 
-import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.support.v4.app.ActivityCompat;
@@ -15,7 +14,6 @@ import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.content.pm.PackageManager;
 import android.view.View;
-
 import static android.os.Debug.waitForDebugger;
 
 import com.amazonaws.mobileconnectors.lambdainvoker.*;
@@ -42,7 +40,6 @@ public class MainActivity extends AppCompatActivity implements
     public FusedLocationProviderClient mFusedLocationClient;
     public Location mCurrentLocation;
     public static userLocation uLocation;
-    static boolean accessFlag = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,30 +52,6 @@ public class MainActivity extends AppCompatActivity implements
         /*ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);*/
 
         startLocationUpdates();
-
-        CardView card_view = findViewById(R.id.cardViewLogin);
-        card_view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // do whatever you want to do on click (to launch any fragment or activity you need to put intent here.)
-                // Need Logic here to check if login credentials are found in users table
-                if (accessFlag == true) {
-                    //Go to main list view
-                }
-                else {
-                    AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
-                    alertDialog.setTitle("Login Issue");
-                    alertDialog.setMessage("Incorrect username and password combination.");
-                    alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.dismiss();
-                                }
-                            });
-                    alertDialog.show();
-                }
-            }
-        });
     }
 
     protected void startLocationUpdates() {
