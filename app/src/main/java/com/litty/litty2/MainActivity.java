@@ -109,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private static class locationTask extends AsyncTask<userLocation, Void, String>{
-        private WeakReference<MainActivity> activityReference;
+        private WeakReference<MainActivity> activityReference; //Determine if I need this this to resolve memory leak
         userLocationInterface userLocationInterface;
 
         // only retain a weak reference to the activity
