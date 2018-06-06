@@ -107,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements
 
     }
 
-    private static class locationTask extends AsyncTask<userLocation, Void, String>{
+    private static class locationTask extends AsyncTask<userLocation, Void, Void>{
         private WeakReference<MainActivity> activityReference; //Determine if I need this this to resolve memory leak
         userLocationInterface userLocationInterface;
 
@@ -132,7 +132,7 @@ public class MainActivity extends AppCompatActivity implements
         }
 
         @Override
-        protected String doInBackground(userLocation... params) {
+        protected Void doInBackground(userLocation... params) {
             // invoke "userLocationInterface" method. In case it fails, it will throw a
             // LambdaFunctionException.
             try {
@@ -141,13 +141,6 @@ public class MainActivity extends AppCompatActivity implements
             } catch (LambdaFunctionException lfe) {
                 Log.e("TAG", "Failed to invoke updateUserLocation", lfe);
                 return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            if (result == null) {
-                return;
             }
         }
     }

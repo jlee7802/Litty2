@@ -5,7 +5,7 @@ import com.amazonaws.mobileconnectors.lambdainvoker.LambdaFunction;
 // in this interface must match the function names in AWS - JL
 public interface userLocationInterface {
     @LambdaFunction
-    String updateUserLocation(userLocation userLocationObj);
+    Void updateUserLocation(userLocation userLocationObj);
 
     @LambdaFunction
     Integer verifyUserLogin(userCredential userCredentialObj);
