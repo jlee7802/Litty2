@@ -1,8 +1,5 @@
 package com.litty.litty2;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.support.v4.app.ActivityCompat;
@@ -10,10 +7,8 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.Manifest;
-import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.content.pm.PackageManager;
-import android.view.View;
 import static android.os.Debug.waitForDebugger;
 
 import com.amazonaws.mobileconnectors.lambdainvoker.*;
@@ -47,7 +42,6 @@ public class MainActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_main);
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        //final View loginView = (View)((Activity)this).FindViewById(R.id.loginLayout);
 
         /*ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);*/
 
@@ -139,10 +133,10 @@ public class MainActivity extends AppCompatActivity implements
 
         @Override
         protected String doInBackground(userLocation... params) {
-            // invoke "echo" method. In case it fails, it will throw a
+            // invoke "userLocationInterface" method. In case it fails, it will throw a
             // LambdaFunctionException.
             try {
-                waitForDebugger();
+                //waitForDebugger();
                 return userLocationInterface.updateUserLocation(params[0]);
             } catch (LambdaFunctionException lfe) {
                 Log.e("TAG", "Failed to invoke updateUserLocation", lfe);
