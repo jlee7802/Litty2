@@ -128,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements
             // LambdaDataBinder
             userLocationInterface = factory.build(userLocationInterface.class);
 
-            uLocation = new userLocation(String.valueOf(location.getLatitude()),String.valueOf(location.getLongitude()),String.valueOf(1)); // Need to figure out how to get user id when user logs in
+            uLocation = new userLocation(location.getLatitude(),location.getLongitude(),1); // Need to figure out how to get user id when user logs in
         }
 
         @Override
