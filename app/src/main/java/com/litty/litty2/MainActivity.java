@@ -9,6 +9,9 @@ import android.os.Bundle;
 import android.Manifest;
 import android.util.Log;
 import android.content.pm.PackageManager;
+import android.view.ViewTreeObserver;
+import android.widget.RelativeLayout;
+
 import static android.os.Debug.waitForDebugger;
 
 import com.amazonaws.mobileconnectors.lambdainvoker.*;
@@ -38,6 +41,7 @@ public class MainActivity extends AppCompatActivity implements
     public Location mCurrentLocation;
     public static userLocation uLocation;
     public static List<locationObj> locationList;
+    int topLayoutDescHeight;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +49,7 @@ public class MainActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_main);
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-
+        setControlSize();
         /*ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);*/
 
         startLocationUpdates();
@@ -192,5 +196,18 @@ public class MainActivity extends AppCompatActivity implements
             }
             locationList = result;
         }
+    }
+
+    public void setControlSize() {
+        final RelativeLayout topDescLayout = findViewById(R.id.descriptionLayout);
+        ViewTreeObserver vto = topDescLayout.getViewTreeObserver();
+        vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            public boolean onPreDraw() {
+                topDescLayout.getViewTreeObserver().removeOnPreDrawListener(this);
+                int h = topDescLayout.getMeasuredHeight();
+                topLayoutDescHeight = h/3; //Need to figure out if there is a way to dynamically get number of rows instead of hardcoding - JL
+                return true;
+            }
+        });
     }
 }
