@@ -24,10 +24,12 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
+import com.litty.userLocationPackage.locationObj;
 import com.litty.userLocationPackage.userLocation;
 import com.litty.userLocationPackage.userLocationInterface;
 
 import java.lang.ref.WeakReference;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements
         ConnectionCallbacks, OnConnectionFailedListener, LocationListener{
@@ -35,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements
     public FusedLocationProviderClient mFusedLocationClient;
     public Location mCurrentLocation;
     public static userLocation uLocation;
+    public static List<locationObj> locationList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements
             LocationCallback mLocationCallback = new LocationCallback() {
                 @Override
                 public void onLocationResult(LocationResult locationResult) {
-                    //waitForDebugger();
+                    waitForDebugger();
                     if (locationResult == null) {
                         return;
                     }
@@ -78,6 +81,9 @@ public class MainActivity extends AppCompatActivity implements
             };
 
             mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, null);
+
+            //call top location  list async here
+            new getTopLocationsTask(MainActivity.this).execute();
         }
         else {
             ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
@@ -142,6 +148,49 @@ public class MainActivity extends AppCompatActivity implements
                 Log.e("TAG", "Failed to invoke updateUserLocation", lfe);
                 return null;
             }
+        }
+    }
+
+    private static class getTopLocationsTask extends AsyncTask<Void, Void, List<locationObj>>{
+        private WeakReference<MainActivity> activityReference; //Determine if I need this this to resolve memory leak
+        userLocationInterface userLocationInterface;
+
+        // only retain a weak reference to the activity
+        getTopLocationsTask(MainActivity context) {
+            activityReference = new WeakReference<>(context);
+
+            // Create an instance of CognitoCachingCredentialsProvider
+            CognitoCachingCredentialsProvider credentialsProvider = new CognitoCachingCredentialsProvider(
+                    context.getApplicationContext(), "us-east-1:caa8736d-fa24-483f-bf6a-4ee5b4da1436", Regions.US_EAST_1);
+
+            // Create LambdaInvokerFactory, to be used to instantiate the Lambda proxy.
+            LambdaInvokerFactory factory = new LambdaInvokerFactory(context.getApplicationContext(), Regions.US_EAST_1, credentialsProvider);
+
+            // Create the Lambda proxy object with default Json data binder.
+            // You can provide your own data binder by implementing
+            // LambdaDataBinder
+            userLocationInterface = factory.build(userLocationInterface.class);
+        }
+
+        @Override
+        protected List<locationObj> doInBackground(Void... params) {
+            // invoke "userLocationInterface" method. In case it fails, it will throw a
+            // LambdaFunctionException.
+            try {
+                waitForDebugger();
+                return userLocationInterface.getTopMFCountLocations();
+            } catch (LambdaFunctionException lfe) {
+                Log.e("TAG", "Failed to invoke getTopMFCountLocations", lfe);
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(List<locationObj> result) {
+            if (result == null) {
+                return;
+            }
+            locationList = result;
         }
     }
 }
