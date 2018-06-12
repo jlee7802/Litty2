@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.Manifest;
 import android.util.Log;
 import android.content.pm.PackageManager;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.RelativeLayout;
 
@@ -41,7 +42,6 @@ public class MainActivity extends AppCompatActivity implements
     public Location mCurrentLocation;
     public static userLocation uLocation;
     public static List<locationObj> locationList;
-    int topLayoutDescHeight;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_main);
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        setControlSize();
+        setTopLayout();
         /*ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);*/
 
         startLocationUpdates();
@@ -88,6 +88,7 @@ public class MainActivity extends AppCompatActivity implements
 
             //call top location  list async here
             new getTopLocationsTask(MainActivity.this).execute();
+            setLocationListLayout();
         }
         else {
             ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
@@ -117,6 +118,7 @@ public class MainActivity extends AppCompatActivity implements
 
     }
 
+    // async task to store location on user (latitude and longitude) in users table
     private static class locationTask extends AsyncTask<userLocation, Void, Void>{
         private WeakReference<MainActivity> activityReference; //Determine if I need this this to resolve memory leak
         userLocationInterface userLocationInterface;
@@ -155,6 +157,7 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
+    // Method to get top locations based on male and female count(mfCount) at location.
     private static class getTopLocationsTask extends AsyncTask<Void, Void, List<locationObj>>{
         private WeakReference<MainActivity> activityReference; //Determine if I need this this to resolve memory leak
         userLocationInterface userLocationInterface;
@@ -198,16 +201,41 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    public void setControlSize() {
+    // Programmatically sets the height/position and other properties for the layouts in the top layout. This is
+    // to avoid nested sum weights with Linear layouts which can cause performance issues
+    public void setTopLayout() {
         final RelativeLayout topDescLayout = findViewById(R.id.descriptionLayout);
         ViewTreeObserver vto = topDescLayout.getViewTreeObserver();
         vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             public boolean onPreDraw() {
                 topDescLayout.getViewTreeObserver().removeOnPreDrawListener(this);
                 int h = topDescLayout.getMeasuredHeight();
-                topLayoutDescHeight = h/3; //Need to figure out if there is a way to dynamically get number of rows instead of hardcoding - JL
+                int topLayoutDescRowHeight = h/3; //Need to figure out if there is a way to dynamically get number of rows instead of hardcoding - JL
+
+                RelativeLayout rlGender = findViewById(R.id.descriptionLayout_gender);
+                RelativeLayout rlRace = findViewById(R.id.descriptionLayout_race);
+                RelativeLayout rlAge = findViewById(R.id.descriptionLayout_age);
+
+                RelativeLayout.LayoutParams paramsGender = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, topLayoutDescRowHeight);
+                paramsGender.height = topLayoutDescRowHeight;
+                rlGender.setLayoutParams(paramsGender);
+
+                RelativeLayout.LayoutParams paramsRace = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, topLayoutDescRowHeight);
+                paramsRace.height = topLayoutDescRowHeight;
+                paramsRace.addRule(RelativeLayout.BELOW, R.id.descriptionLayout_gender);
+                rlRace.setLayoutParams(paramsRace);
+
+                RelativeLayout.LayoutParams paramsAge = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, topLayoutDescRowHeight);
+                paramsAge.height = topLayoutDescRowHeight;
+                paramsAge.addRule(RelativeLayout.BELOW, R.id.descriptionLayout_race);
+                rlAge.setLayoutParams(paramsAge);
                 return true;
             }
         });
+    }
+
+    // Programmatically create Location List Layout, will pull 24 top locations but only 6 can show on the UI at a time
+    public void setLocationListLayout() {
+
     }
 }
