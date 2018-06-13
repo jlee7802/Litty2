@@ -1,5 +1,6 @@
 package com.litty.litty2;
 
+import android.graphics.Color;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.support.v4.app.ActivityCompat;
@@ -9,6 +10,8 @@ import android.os.Bundle;
 import android.Manifest;
 import android.util.Log;
 import android.content.pm.PackageManager;
+import android.util.TypedValue;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.RelativeLayout;
@@ -217,16 +220,13 @@ public class MainActivity extends AppCompatActivity implements
                 RelativeLayout rlAge = findViewById(R.id.descriptionLayout_age);
 
                 RelativeLayout.LayoutParams paramsGender = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, topLayoutDescRowHeight);
-                paramsGender.height = topLayoutDescRowHeight;
                 rlGender.setLayoutParams(paramsGender);
 
                 RelativeLayout.LayoutParams paramsRace = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, topLayoutDescRowHeight);
-                paramsRace.height = topLayoutDescRowHeight;
                 paramsRace.addRule(RelativeLayout.BELOW, R.id.descriptionLayout_gender);
                 rlRace.setLayoutParams(paramsRace);
 
                 RelativeLayout.LayoutParams paramsAge = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, topLayoutDescRowHeight);
-                paramsAge.height = topLayoutDescRowHeight;
                 paramsAge.addRule(RelativeLayout.BELOW, R.id.descriptionLayout_race);
                 rlAge.setLayoutParams(paramsAge);
                 return true;
@@ -236,6 +236,29 @@ public class MainActivity extends AppCompatActivity implements
 
     // Programmatically create Location List Layout, will pull 24 top locations but only 6 can show on the UI at a time
     public void setLocationListLayout() {
+        RelativeLayout listLayout = findViewById(R.id.listLayout);
+        int rowNum = 6;  // This number should be 24 initially but if the user scrolls down and reaches the end then we need to add more to relative layout listLayout - JL
+        int layoutId = View.generateViewId();
+
+        // Dynamically create the relative layout items in ListLayout
+        for (int i = 0; i < rowNum; i++) {
+            RelativeLayout listItem = new RelativeLayout(this);
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 250);
+            if (i != 0) {
+                params.addRule(RelativeLayout.BELOW, layoutId);
+                layoutId = View.generateViewId();
+            }
+
+            if (i % 2 == 0)
+                listItem.setBackgroundColor(Color.RED);
+            else
+                listItem.setBackgroundColor(Color.BLUE);
+
+            listItem.setId(layoutId);
+
+            listItem.setLayoutParams(params);
+            listLayout.addView(listItem);
+        }
 
     }
 }
