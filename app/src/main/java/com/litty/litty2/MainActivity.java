@@ -1,6 +1,7 @@
 package com.litty.litty2;
 
 import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.support.v4.app.ActivityCompat;
@@ -14,7 +15,9 @@ import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import static android.os.Debug.waitForDebugger;
 
@@ -51,10 +54,15 @@ public class MainActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        setTopLayout();
         /*ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);*/
 
+        // Create layouts and widgets for mainActivity
+        LinearLayout mainLayout = findViewById(R.id.mainLayout);
+        mainLayout.setBackgroundColor(Color.BLACK);
+        setTopLayout();
+
+        // Get Location data
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         startLocationUpdates();
     }
 
@@ -242,22 +250,29 @@ public class MainActivity extends AppCompatActivity implements
 
         // Dynamically create the relative layout items in ListLayout
         for (int i = 0; i < rowNum; i++) {
-            RelativeLayout listItem = new RelativeLayout(this);
+            RelativeLayout listLayoutItem = new RelativeLayout(this);
+
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 250);
             if (i != 0) {
                 params.addRule(RelativeLayout.BELOW, layoutId);
                 layoutId = View.generateViewId();
             }
 
-            if (i % 2 == 0)
-                listItem.setBackgroundColor(Color.RED);
-            else
-                listItem.setBackgroundColor(Color.BLUE);
+            params.setMargins(5,18,5,18);
 
-            listItem.setId(layoutId);
+            TextView titleTV = new TextView(this);
+            titleTV.setText("hallo hallo");
 
-            listItem.setLayoutParams(params);
-            listLayout.addView(listItem);
+            GradientDrawable gd = new GradientDrawable();
+            gd.setCornerRadius(10);
+            gd.setStroke(5, Color.WHITE);
+
+            listLayout.setBackgroundColor(Color.BLACK);
+            listLayoutItem.setBackground(gd);
+            listLayoutItem.setId(layoutId);
+
+            listLayoutItem.setLayoutParams(params);
+            listLayout.addView(listLayoutItem);
         }
 
     }
