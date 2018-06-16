@@ -1,23 +1,25 @@
 package com.litty.litty2;
 
+import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.Manifest;
 import android.util.Log;
 import android.content.pm.PackageManager;
-import android.util.TypedValue;
-import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.os.Parcelable;
 
 import static android.os.Debug.waitForDebugger;
 
@@ -35,10 +37,10 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 import com.litty.userLocationPackage.locationObj;
+import com.litty.userLocationPackage.locationObjParcelable;
 import com.litty.userLocationPackage.userLocation;
 import com.litty.userLocationPackage.userLocationInterface;
 
-import java.lang.ref.WeakReference;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements
@@ -47,7 +49,6 @@ public class MainActivity extends AppCompatActivity implements
     public FusedLocationProviderClient mFusedLocationClient;
     public Location mCurrentLocation;
     public static userLocation uLocation;
-    public static List<locationObj> locationList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +56,14 @@ public class MainActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_main);
 
         /*ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);*/
+
+        // Add ListLayout fragment to MainActivity
+       /* FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+        ListLayoutFragment fragment = new ListLayoutFragment();
+        fragmentTransaction.add(R.id.listLayout, fragment);
+        fragmentTransaction.commit();*/
 
         // Create layouts and widgets for mainActivity
         LinearLayout mainLayout = findViewById(R.id.mainLayout);
@@ -96,10 +105,7 @@ public class MainActivity extends AppCompatActivity implements
             };
 
             mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, null);
-
-            //call top location  list async here
             new getTopLocationsTask(MainActivity.this).execute();
-            setLocationListLayout();
         }
         else {
             ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
@@ -131,13 +137,10 @@ public class MainActivity extends AppCompatActivity implements
 
     // async task to store location on user (latitude and longitude) in users table
     private static class locationTask extends AsyncTask<userLocation, Void, Void>{
-        private WeakReference<MainActivity> activityReference; //Determine if I need this this to resolve memory leak
         userLocationInterface userLocationInterface;
 
         // only retain a weak reference to the activity
         locationTask(MainActivity context, Location location) {
-            activityReference = new WeakReference<>(context);
-
             // Create an instance of CognitoCachingCredentialsProvider
             CognitoCachingCredentialsProvider credentialsProvider = new CognitoCachingCredentialsProvider(
                     context.getApplicationContext(), "us-east-1:caa8736d-fa24-483f-bf6a-4ee5b4da1436", Regions.US_EAST_1);
@@ -169,14 +172,11 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     // Method to get top locations based on male and female count(mfCount) at location.
-    private static class getTopLocationsTask extends AsyncTask<Void, Void, List<locationObj>>{
-        private WeakReference<MainActivity> activityReference; //Determine if I need this this to resolve memory leak
+    private class getTopLocationsTask extends AsyncTask<Void, Void, List<locationObj>>{
         userLocationInterface userLocationInterface;
 
         // only retain a weak reference to the activity
         getTopLocationsTask(MainActivity context) {
-            activityReference = new WeakReference<>(context);
-
             // Create an instance of CognitoCachingCredentialsProvider
             CognitoCachingCredentialsProvider credentialsProvider = new CognitoCachingCredentialsProvider(
                     context.getApplicationContext(), "us-east-1:caa8736d-fa24-483f-bf6a-4ee5b4da1436", Regions.US_EAST_1);
@@ -208,7 +208,20 @@ public class MainActivity extends AppCompatActivity implements
             if (result == null) {
                 return;
             }
-            locationList = result;
+
+            locationObjParcelable locationDetail = new locationObjParcelable(result);
+
+            // Add ListLayout fragment to MainActivity
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+            ListLayoutFragment fragment = new ListLayoutFragment();
+            fragmentTransaction.add(R.id.listLayout, fragment);
+            fragmentTransaction.commit();
+
+            Bundle bundle = new Bundle();
+            bundle.putParcelable("location_obj_list", locationDetail);
+            fragment.setArguments(bundle);
         }
     }
 
@@ -240,40 +253,5 @@ public class MainActivity extends AppCompatActivity implements
                 return true;
             }
         });
-    }
-
-    // Programmatically create Location List Layout, will pull 24 top locations but only 6 can show on the UI at a time
-    public void setLocationListLayout() {
-        RelativeLayout listLayout = findViewById(R.id.listLayout);
-        int rowNum = 6;  // This number should be 24 initially but if the user scrolls down and reaches the end then we need to add more to relative layout listLayout - JL
-        int layoutId = View.generateViewId();
-
-        // Dynamically create the relative layout items in ListLayout
-        for (int i = 0; i < rowNum; i++) {
-            RelativeLayout listLayoutItem = new RelativeLayout(this);
-
-            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 250);
-            if (i != 0) {
-                params.addRule(RelativeLayout.BELOW, layoutId);
-                layoutId = View.generateViewId();
-            }
-
-            params.setMargins(5,18,5,18);
-
-            TextView titleTV = new TextView(this);
-            titleTV.setText("hallo hallo");
-
-            GradientDrawable gd = new GradientDrawable();
-            gd.setCornerRadius(10);
-            gd.setStroke(5, Color.WHITE);
-
-            listLayout.setBackgroundColor(Color.BLACK);
-            listLayoutItem.setBackground(gd);
-            listLayoutItem.setId(layoutId);
-
-            listLayoutItem.setLayoutParams(params);
-            listLayout.addView(listLayoutItem);
-        }
-
     }
 }
