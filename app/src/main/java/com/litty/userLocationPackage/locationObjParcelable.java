@@ -34,4 +34,8 @@ public class locationObjParcelable implements Parcelable {
             return new locationObjParcelable[size];
         }
     };
+
+    public List<locationObj> getLocationObjList() {
+        return locationObjList;
+    }
 }

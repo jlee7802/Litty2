@@ -36,11 +36,14 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
+import com.google.gson.reflect.TypeToken;
+import com.litty.userLocationPackage.MyLambdaDataBinder;
 import com.litty.userLocationPackage.locationObj;
 import com.litty.userLocationPackage.locationObjParcelable;
 import com.litty.userLocationPackage.userLocation;
 import com.litty.userLocationPackage.userLocationInterface;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements
@@ -186,8 +189,9 @@ public class MainActivity extends AppCompatActivity implements
 
             // Create the Lambda proxy object with default Json data binder.
             // You can provide your own data binder by implementing
-            // LambdaDataBinder
-            userLocationInterface = factory.build(userLocationInterface.class);
+            // LambdaDataBinder.  This is important because the return type will be LinkedTreeMap so
+            // you need to change it to the correct class type by using LambdaDataBinder - JL
+            userLocationInterface = factory.build(userLocationInterface.class, new MyLambdaDataBinder(new TypeToken<List<locationObj>>() {}.getType()));
         }
 
         @Override
