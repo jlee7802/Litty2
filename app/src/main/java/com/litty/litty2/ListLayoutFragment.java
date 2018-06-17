@@ -7,6 +7,9 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -26,6 +29,7 @@ public class ListLayoutFragment extends Fragment {
         Bundle bundle = this.getArguments();
 
         if (bundle != null) {
+            setTopLayout(view);
             locationObjParcelable locationDetail = bundle.getParcelable("location_obj_list");
             setLocationListLayout(listLayout, locationDetail.getLocationObjList());
         }
@@ -41,8 +45,9 @@ public class ListLayoutFragment extends Fragment {
 
         // Dynamically create the list items in ListLayout
         try {
-            for (locationObj ii : locationList) {
-                int i = 0;
+            int i;
+            for (locationObj location : locationList) {
+                i = 0;
                 RelativeLayout listLayoutItem = new RelativeLayout(getActivity());
 
                 RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 250);
@@ -52,7 +57,13 @@ public class ListLayoutFragment extends Fragment {
                 }
 
                 TextView titleTV = new TextView(getContext());
-                //titleTV.setText(location.locationName());
+                titleTV.setText(location.locationName());
+                titleTV.setTextColor(Color.WHITE);
+                listLayoutItem.addView(titleTV);
+
+                ImageView liPhoto = new ImageView(getContext());
+                liPhoto.setImageResource(R.drawable.leopard);
+                listLayoutItem.addView(liPhoto);
 
                 params.setMargins(5, 18, 5, 18);
 
@@ -68,6 +79,53 @@ public class ListLayoutFragment extends Fragment {
                 listLayout.addView(listLayoutItem);
                 ++i;
             }
+        }
+        catch(Exception e) {
+            String mes = e.getMessage();
+        }
+    }
+
+    // Programmatically sets the height/position and other properties for the layouts in the top layout. This is
+    // to avoid nested sum weights with Linear layouts which can cause performance issues
+    public void setTopLayout(final View view) {
+        try {
+            final RelativeLayout topDescLayout = view.findViewById(R.id.descriptionLayout);
+            final LinearLayout topLayout = view.findViewById(R.id.topLayout);
+            ViewTreeObserver vto = topDescLayout.getViewTreeObserver();
+            vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                public boolean onPreDraw() {
+                    topDescLayout.getViewTreeObserver().removeOnPreDrawListener(this);
+                    int h = topDescLayout.getMeasuredHeight();
+                    int topLayoutDescRowHeight = h / 3; //Need to figure out if there is a way to dynamically get number of rows instead of hardcoding - JL
+
+                    RelativeLayout rlGender = view.findViewById(R.id.descriptionLayout_gender);
+                    RelativeLayout rlRace = view.findViewById(R.id.descriptionLayout_race);
+                    RelativeLayout rlAge = view.findViewById(R.id.descriptionLayout_age);
+
+                    RelativeLayout.LayoutParams paramsGender = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, topLayoutDescRowHeight);
+                    rlGender.setLayoutParams(paramsGender);
+
+                    RelativeLayout.LayoutParams paramsRace = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, topLayoutDescRowHeight);
+                    paramsRace.addRule(RelativeLayout.BELOW, R.id.descriptionLayout_gender);
+                    rlRace.setLayoutParams(paramsRace);
+
+                    RelativeLayout.LayoutParams paramsAge = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, topLayoutDescRowHeight);
+                    paramsAge.addRule(RelativeLayout.BELOW, R.id.descriptionLayout_race);
+                    rlAge.setLayoutParams(paramsAge);
+
+                    ImageView liPhoto = new ImageView(getContext());
+                    liPhoto.setImageResource(R.drawable.leopard);
+                    LinearLayout.LayoutParams lpImage = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, 1f);
+                    liPhoto.setLayoutParams(lpImage);
+                    topLayout.addView(liPhoto);
+
+                    LinearLayout.LayoutParams lpDesc = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, 1f);
+                    topDescLayout.setLayoutParams(lpDesc);
+                    topLayout.addView(topDescLayout);
+
+                    return true;
+                }
+            });
         }
         catch(Exception e) {
             String mes = e.getMessage();

@@ -43,6 +43,7 @@ import com.litty.userLocationPackage.locationObjParcelable;
 import com.litty.userLocationPackage.userLocation;
 import com.litty.userLocationPackage.userLocationInterface;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,18 +61,9 @@ public class MainActivity extends AppCompatActivity implements
 
         /*ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);*/
 
-        // Add ListLayout fragment to MainActivity
-       /* FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
-        ListLayoutFragment fragment = new ListLayoutFragment();
-        fragmentTransaction.add(R.id.listLayout, fragment);
-        fragmentTransaction.commit();*/
-
         // Create layouts and widgets for mainActivity
         LinearLayout mainLayout = findViewById(R.id.mainLayout);
         mainLayout.setBackgroundColor(Color.BLACK);
-        setTopLayout();
 
         // Get Location data
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
@@ -108,7 +100,7 @@ public class MainActivity extends AppCompatActivity implements
             };
 
             mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, null);
-            new getTopLocationsTask(MainActivity.this).execute();
+            new getTopLocationsTask(this).execute();
         }
         else {
             ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
@@ -175,11 +167,15 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     // Method to get top locations based on male and female count(mfCount) at location.
-    private class getTopLocationsTask extends AsyncTask<Void, Void, List<locationObj>>{
+    private class getTopLocationsTask extends AsyncTask<Void, Void, List<locationObj>>{ //Check if memory leak is an issue -JL
         userLocationInterface userLocationInterface;
+        private WeakReference<MainActivity> activityReference;
+
 
         // only retain a weak reference to the activity
         getTopLocationsTask(MainActivity context) {
+            activityReference = new WeakReference<>(context);
+
             // Create an instance of CognitoCachingCredentialsProvider
             CognitoCachingCredentialsProvider credentialsProvider = new CognitoCachingCredentialsProvider(
                     context.getApplicationContext(), "us-east-1:caa8736d-fa24-483f-bf6a-4ee5b4da1436", Regions.US_EAST_1);
@@ -213,6 +209,9 @@ public class MainActivity extends AppCompatActivity implements
                 return;
             }
 
+            MainActivity activity = activityReference.get();
+            if (activity == null || activity.isFinishing()) return;
+
             locationObjParcelable locationDetail = new locationObjParcelable(result);
 
             // Add ListLayout fragment to MainActivity
@@ -220,42 +219,12 @@ public class MainActivity extends AppCompatActivity implements
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
             ListLayoutFragment fragment = new ListLayoutFragment();
-            fragmentTransaction.add(R.id.listLayout, fragment);
+            fragmentTransaction.add(R.id.mainLayout, fragment);
             fragmentTransaction.commit();
 
             Bundle bundle = new Bundle();
             bundle.putParcelable("location_obj_list", locationDetail);
             fragment.setArguments(bundle);
         }
-    }
-
-    // Programmatically sets the height/position and other properties for the layouts in the top layout. This is
-    // to avoid nested sum weights with Linear layouts which can cause performance issues
-    public void setTopLayout() {
-        final RelativeLayout topDescLayout = findViewById(R.id.descriptionLayout);
-        ViewTreeObserver vto = topDescLayout.getViewTreeObserver();
-        vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-            public boolean onPreDraw() {
-                topDescLayout.getViewTreeObserver().removeOnPreDrawListener(this);
-                int h = topDescLayout.getMeasuredHeight();
-                int topLayoutDescRowHeight = h/3; //Need to figure out if there is a way to dynamically get number of rows instead of hardcoding - JL
-
-                RelativeLayout rlGender = findViewById(R.id.descriptionLayout_gender);
-                RelativeLayout rlRace = findViewById(R.id.descriptionLayout_race);
-                RelativeLayout rlAge = findViewById(R.id.descriptionLayout_age);
-
-                RelativeLayout.LayoutParams paramsGender = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, topLayoutDescRowHeight);
-                rlGender.setLayoutParams(paramsGender);
-
-                RelativeLayout.LayoutParams paramsRace = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, topLayoutDescRowHeight);
-                paramsRace.addRule(RelativeLayout.BELOW, R.id.descriptionLayout_gender);
-                rlRace.setLayoutParams(paramsRace);
-
-                RelativeLayout.LayoutParams paramsAge = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, topLayoutDescRowHeight);
-                paramsAge.addRule(RelativeLayout.BELOW, R.id.descriptionLayout_race);
-                rlAge.setLayoutParams(paramsAge);
-                return true;
-            }
-        });
     }
 }
