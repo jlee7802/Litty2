@@ -20,7 +20,7 @@ android:padding="6dip"
         tools:context=".MainActivity">
 
         <ImageView
-            android:id="@+id/topIcon"
+            android:id="@+id/topImage"
             android:layout_width="0dp"
             android:layout_height="fill_parent"
             android:layout_marginEnd="6dip"

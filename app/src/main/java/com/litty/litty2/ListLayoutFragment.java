@@ -113,15 +113,8 @@ public class ListLayoutFragment extends Fragment {
                     paramsAge.addRule(RelativeLayout.BELOW, R.id.descriptionLayout_race);
                     rlAge.setLayoutParams(paramsAge);
 
-                    ImageView liPhoto = new ImageView(getContext());
+                    ImageView liPhoto = view.findViewById(R.id.topImage);
                     liPhoto.setImageResource(R.drawable.leopard);
-                    LinearLayout.LayoutParams lpImage = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, 1f);
-                    liPhoto.setLayoutParams(lpImage);
-                    topLayout.addView(liPhoto);
-
-                    LinearLayout.LayoutParams lpDesc = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, 1f);
-                    topDescLayout.setLayoutParams(lpDesc);
-                    topLayout.addView(topDescLayout);
 
                     return true;
                 }
