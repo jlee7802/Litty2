@@ -82,7 +82,7 @@ public class ListLayoutFragment extends Fragment {
                 // Add image and text for List item.
                 RelativeLayout layout = view.findViewById(R.id.listLayout);
                 int liWidth  = layout.getMeasuredWidth();
-                int imageWidth = liWidth/4;
+                int imageWidth = liWidth/4; 
 
                 RelativeLayout.LayoutParams imageParams = new RelativeLayout.LayoutParams(imageWidth, ViewGroup.LayoutParams.MATCH_PARENT);
                 RelativeLayout.LayoutParams textTitleParams = new RelativeLayout.LayoutParams(liWidth - imageWidth, ViewGroup.LayoutParams.MATCH_PARENT);
