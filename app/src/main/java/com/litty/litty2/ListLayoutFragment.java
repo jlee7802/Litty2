@@ -23,15 +23,25 @@ public class ListLayoutFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.activity_main, container, false);
-        RelativeLayout listLayout = view.findViewById(R.id.listLayout);
+        final View view = inflater.inflate(R.layout.activity_main, container, false);
+        final RelativeLayout listLayout = view.findViewById(R.id.listLayout);
 
         Bundle bundle = this.getArguments();
 
         if (bundle != null) {
             setTopLayout(view);
-            locationObjParcelable locationDetail = bundle.getParcelable("location_obj_list");
-            setLocationListLayout(listLayout, locationDetail.getLocationObjList());
+            final locationObjParcelable locationDetail = bundle.getParcelable("location_obj_list");
+
+            // Create list layout items when bottom relative layout is rendered
+            ViewTreeObserver vto = listLayout.getViewTreeObserver();
+            vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    listLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    setLocationListLayout(listLayout, locationDetail.getLocationObjList(), view);
+
+                }
+            });
         }
 
         // Inflate the layout for this fragment
@@ -39,33 +49,24 @@ public class ListLayoutFragment extends Fragment {
     }
 
     // Programmatically create Location List Layout, will pull 24 top locations but only 6 can show on the UI at a time
-    public void setLocationListLayout(RelativeLayout listLayout, List<locationObj> locationList) {
+    public void setLocationListLayout(RelativeLayout listLayout, List<locationObj> locationList, View view) {
         // Number of rows should be 24 initially but if the user scrolls down and reaches the end then we need to add more list items to relative layout listLayout - JL
         int layoutId = View.generateViewId();
 
         // Dynamically create the list items in ListLayout
         try {
-            int i;
+            int i = 0;
             for (locationObj location : locationList) {
-                i = 0;
                 RelativeLayout listLayoutItem = new RelativeLayout(getActivity());
 
-                RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 250);
+                RelativeLayout.LayoutParams liParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 250);
+
                 if (i != 0) {
-                    params.addRule(RelativeLayout.BELOW, layoutId);
+                    liParams.addRule(RelativeLayout.BELOW, layoutId);
                     layoutId = View.generateViewId();
                 }
 
-                TextView titleTV = new TextView(getContext());
-                titleTV.setText(location.locationName());
-                titleTV.setTextColor(Color.WHITE);
-                listLayoutItem.addView(titleTV);
-
-                ImageView liPhoto = new ImageView(getContext());
-                liPhoto.setImageResource(R.drawable.leopard);
-                listLayoutItem.addView(liPhoto);
-
-                params.setMargins(5, 18, 5, 18);
+                liParams.setMargins(5, 18, 5, 18);
 
                 GradientDrawable gd = new GradientDrawable();
                 gd.setCornerRadius(10);
@@ -75,8 +76,38 @@ public class ListLayoutFragment extends Fragment {
                 listLayoutItem.setBackground(gd);
                 listLayoutItem.setId(layoutId);
 
-                listLayoutItem.setLayoutParams(params);
+                listLayoutItem.setLayoutParams(liParams);
                 listLayout.addView(listLayoutItem);
+
+                // Add image and text for List item.
+                RelativeLayout layout = view.findViewById(R.id.listLayout);
+                int liWidth  = layout.getMeasuredWidth();
+                int imageWidth = liWidth/4;
+
+                RelativeLayout.LayoutParams imageParams = new RelativeLayout.LayoutParams(imageWidth, ViewGroup.LayoutParams.MATCH_PARENT);
+                RelativeLayout.LayoutParams textTitleParams = new RelativeLayout.LayoutParams(liWidth - imageWidth, ViewGroup.LayoutParams.MATCH_PARENT);
+                RelativeLayout.LayoutParams textDescParams = new RelativeLayout.LayoutParams(liWidth - imageWidth, ViewGroup.LayoutParams.MATCH_PARENT);
+
+                imageParams.setMargins(8,21,8,21);
+                textTitleParams.setMargins(imageWidth + 100, 21, 8, 50);
+                textDescParams.setMargins(imageWidth + 100,130, 8, 21);
+
+                TextView titleTV = new TextView(getContext());
+                titleTV.setText(location.locationName());
+                titleTV.setTextColor(Color.WHITE);
+                titleTV.setLayoutParams(textTitleParams);
+                listLayoutItem.addView(titleTV);
+
+                TextView descTV = new TextView(getContext());
+                descTV.setText(location.locationDesc());
+                descTV.setTextColor(Color.WHITE);
+                descTV.setLayoutParams(textDescParams);
+                listLayoutItem.addView(descTV);
+
+                ImageView liPhoto = new ImageView(getContext());
+                liPhoto.setImageResource(R.drawable.leopard);
+                liPhoto.setLayoutParams(imageParams);
+                listLayoutItem.addView(liPhoto);
                 ++i;
             }
         }
@@ -90,7 +121,6 @@ public class ListLayoutFragment extends Fragment {
     public void setTopLayout(final View view) {
         try {
             final RelativeLayout topDescLayout = view.findViewById(R.id.descriptionLayout);
-            final LinearLayout topLayout = view.findViewById(R.id.topLayout);
             ViewTreeObserver vto = topDescLayout.getViewTreeObserver();
             vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
                 public boolean onPreDraw() {
