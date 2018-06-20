@@ -4,12 +4,12 @@ import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -29,7 +29,6 @@ public class ListLayoutFragment extends Fragment {
         Bundle bundle = this.getArguments();
 
         if (bundle != null) {
-            setTopLayout(view);
             final locationObjParcelable locationDetail = bundle.getParcelable("location_obj_list");
 
             // Create list layout items when bottom relative layout is rendered
@@ -40,8 +39,12 @@ public class ListLayoutFragment extends Fragment {
                     listLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                     setLocationListLayout(listLayout, locationDetail.getLocationObjList(), view);
 
+                    // Display top location from location list on topLayout
+                    int id = getResources().getIdentifier(String.valueOf(1), "id", getActivity().getPackageName());
+                    setTopLayout(view, (RelativeLayout)view.findViewById(id));
                 }
             });
+            //setTopLayout(view, null);
         }
 
         // Inflate the layout for this fragment
@@ -57,7 +60,7 @@ public class ListLayoutFragment extends Fragment {
         try {
             int i = 0;
             for (locationObj location : locationList) {
-                RelativeLayout listLayoutItem = new RelativeLayout(getActivity());
+                final RelativeLayout listLayoutItem = new RelativeLayout(getActivity());
 
                 RelativeLayout.LayoutParams liParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 250);
 
@@ -89,13 +92,14 @@ public class ListLayoutFragment extends Fragment {
                 RelativeLayout.LayoutParams textDescParams = new RelativeLayout.LayoutParams(liWidth - imageWidth, ViewGroup.LayoutParams.MATCH_PARENT);
 
                 imageParams.setMargins(8,21,8,21);
-                textTitleParams.setMargins(imageWidth + 100, 30, 8, 130);
+                textTitleParams.setMargins(imageWidth + 100, 20, 8, 130);
                 textDescParams.setMargins(imageWidth + 100,100, 8, 30);
 
                 TextView titleTV = new TextView(getContext());
                 titleTV.setText(location.locationName());
                 titleTV.setTextColor(Color.WHITE);
                 titleTV.setLayoutParams(textTitleParams);
+                titleTV.setTextSize(20);
                 listLayoutItem.addView(titleTV);
 
                 TextView descTV = new TextView(getContext());
@@ -108,6 +112,14 @@ public class ListLayoutFragment extends Fragment {
                 liPhoto.setImageResource(R.drawable.leopard);
                 liPhoto.setLayoutParams(imageParams);
                 listLayoutItem.addView(liPhoto);
+
+                listLayoutItem.setOnClickListener(new View.OnClickListener(){
+                    @Override
+                    public void onClick(View v){
+                        setTopLayout(v, listLayoutItem);
+                    }
+                });
+
                 ++i;
             }
         }
@@ -118,30 +130,55 @@ public class ListLayoutFragment extends Fragment {
 
     // Programmatically sets the height/position and other properties for the layouts in the top layout. This is
     // to avoid nested sum weights with Linear layouts which can cause performance issues
-    public void setTopLayout(final View view) {
+    public void setTopLayout(final View view, RelativeLayout layout) {
         try {
             final RelativeLayout topDescLayout = view.findViewById(R.id.descriptionLayout);
             ViewTreeObserver vto = topDescLayout.getViewTreeObserver();
             vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
                 public boolean onPreDraw() {
                     topDescLayout.getViewTreeObserver().removeOnPreDrawListener(this);
-                    int h = topDescLayout.getMeasuredHeight();
-                    int topLayoutDescRowHeight = h / 3; //Need to figure out if there is a way to dynamically get number of rows instead of hardcoding - JL
+                    //int h = topDescLayout.getMeasuredHeight();
+                    //int topLayoutDescRowHeight = h / 3; //Need to figure out if there is a way to dynamically get number of rows instead of hardcoding - JL
 
-                    RelativeLayout rlGender = view.findViewById(R.id.descriptionLayout_gender);
+                    RelativeLayout rlTitle = view.findViewById(R.id.descriptionLayout_title);
+                    RelativeLayout rlDesc = view.findViewById(R.id.descriptionLayout_desc);
+                    RelativeLayout rlLocationDetail = view.findViewById(R.id.descriptionLayout_locationDetail);
                     RelativeLayout rlRace = view.findViewById(R.id.descriptionLayout_race);
                     RelativeLayout rlAge = view.findViewById(R.id.descriptionLayout_age);
+                    RelativeLayout rlGender = view.findViewById(R.id.descriptionLayout_gender);
 
-                    RelativeLayout.LayoutParams paramsGender = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, topLayoutDescRowHeight);
-                    rlGender.setLayoutParams(paramsGender);
+                    TextView titleTV = new TextView(getContext());
+                    titleTV.setText(String.valueOf(50));
+                    titleTV.setTextColor(Color.WHITE);
+                    titleTV.setTextSize(20);
+                    rlTitle.addView(titleTV);
 
-                    RelativeLayout.LayoutParams paramsRace = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, topLayoutDescRowHeight);
-                    paramsRace.addRule(RelativeLayout.BELOW, R.id.descriptionLayout_gender);
-                    rlRace.setLayoutParams(paramsRace);
+                    TextView descTV = new TextView(getContext());
+                    descTV.setText(String.valueOf(50));
+                    descTV.setTextColor(Color.WHITE);
+                    descTV.setTextSize(15);
+                    rlDesc.addView(descTV);
 
-                    RelativeLayout.LayoutParams paramsAge = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, topLayoutDescRowHeight);
-                    paramsAge.addRule(RelativeLayout.BELOW, R.id.descriptionLayout_race);
-                    rlAge.setLayoutParams(paramsAge);
+                    RelativeLayout.LayoutParams genderParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
+
+                    //genderParams.setMargins(21, 20, 0, 0);
+                    TextView maleTV = new TextView(getContext());
+                    maleTV.setText(String.valueOf(50));
+                    maleTV.setTextColor(Color.WHITE);
+                    maleTV.setTextSize(20);
+                    maleTV.setGravity(Gravity.LEFT);
+                    maleTV.setLayoutParams(genderParams);
+                    rlGender.addView(maleTV);
+
+                    //genderParams.setMargins(0, 0, 0, 0);
+                    TextView femaleTV = new TextView(getContext());
+                    femaleTV.setText(String.valueOf(50));
+                    femaleTV.setTextColor(Color.RED);
+                    femaleTV.setTextSize(20);
+                    femaleTV.setGravity(Gravity.RIGHT);
+                    femaleTV.setLayoutParams(genderParams);
+                    rlGender.addView(femaleTV);
+
 
                     ImageView liPhoto = view.findViewById(R.id.topImage);
                     liPhoto.setImageResource(R.drawable.leopard);

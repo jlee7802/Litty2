@@ -41,13 +41,22 @@ android:padding="6dip"
             tools:context=".MainActivity">
 
             <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:id="@+id/descriptionLayout_title"
+            android:layout_width="match_parent"
+            android:layout_height="25dp"
+            android:layout_alignParentTop="true"
+            tools:context=".MainActivity">
+
+            </RelativeLayout>
+
+            <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:tools="http://schemas.android.com/tools"
-                android:id="@+id/descriptionLayout_gender"
+                android:id="@+id/descriptionLayout_desc"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_alignParentTop="true"
-                android:padding="6dip"
-                android:background="@color/colorAccent"
+                android:layout_height="20dp"
+                android:layout_below="@id/descriptionLayout_title"
+                android:layout_marginTop="-3dp"
                 tools:context=".MainActivity">
 
             </RelativeLayout>
@@ -55,11 +64,11 @@ android:padding="6dip"
             <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:tools="http://schemas.android.com/tools"
                 android:id="@+id/descriptionLayout_race"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
+                android:layout_width="80dp"
+                android:layout_height="40dp"
+                android:layout_below="@id/descriptionLayout_desc"
                 android:padding="6dip"
                 android:orientation="vertical"
-                android:background="@color/colorPrimary"
                 tools:context=".MainActivity">
 
             </RelativeLayout>
@@ -67,11 +76,34 @@ android:padding="6dip"
             <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:tools="http://schemas.android.com/tools"
                 android:id="@+id/descriptionLayout_age"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
+                android:layout_width="80dp"
+                android:layout_height="40dp"
+                android:layout_below="@id/descriptionLayout_race"
                 android:padding="6dip"
                 android:orientation="vertical"
-                android:background="@color/colorAccent"
+                tools:context=".MainActivity">
+
+            </RelativeLayout>
+
+            <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:id="@+id/descriptionLayout_gender"
+                android:layout_width="80dp"
+                android:layout_height="36dp"
+                android:layout_alignParentStart="true"
+                android:layout_below="@id/descriptionLayout_age"
+                tools:context=".MainActivity">
+
+            </RelativeLayout>
+
+            <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:id="@+id/descriptionLayout_locationDetail"
+                android:layout_width="92dp"
+                android:layout_height="119dp"
+                android:layout_alignParentEnd="true"
+                android:layout_below="@id/descriptionLayout_desc"
+                android:padding="6dip"
                 tools:context=".MainActivity">
 
             </RelativeLayout>
