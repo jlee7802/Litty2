@@ -26,6 +26,7 @@ public class ListLayoutFragment extends Fragment {
         final View view = inflater.inflate(R.layout.activity_main, container, false);
         final RelativeLayout listLayout = view.findViewById(R.id.listLayout);
 
+        // Retrieve Parcelable object containing list of locations from Main Activity
         Bundle bundle = this.getArguments();
 
         if (bundle != null) {
@@ -44,7 +45,6 @@ public class ListLayoutFragment extends Fragment {
                     setTopLayout(view, (RelativeLayout)view.findViewById(id));
                 }
             });
-            //setTopLayout(view, null);
         }
 
         // Inflate the layout for this fragment
@@ -116,7 +116,7 @@ public class ListLayoutFragment extends Fragment {
                 listLayoutItem.setOnClickListener(new View.OnClickListener(){
                     @Override
                     public void onClick(View v){
-                        setTopLayout(v, listLayoutItem);
+                        setTopLayout(getView(), (RelativeLayout)v);
                     }
                 });
 
@@ -128,17 +128,18 @@ public class ListLayoutFragment extends Fragment {
         }
     }
 
-    // Programmatically sets the height/position and other properties for the layouts in the top layout. This is
-    // to avoid nested sum weights with Linear layouts which can cause performance issues
-    public void setTopLayout(final View view, RelativeLayout layout) {
+    // Create the widgets for topLayout, passing in view and a listItemLayout
+    public void setTopLayout(final View view, final RelativeLayout listItemLayout) {
         try {
             final RelativeLayout topDescLayout = view.findViewById(R.id.descriptionLayout);
             ViewTreeObserver vto = topDescLayout.getViewTreeObserver();
             vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
                 public boolean onPreDraw() {
                     topDescLayout.getViewTreeObserver().removeOnPreDrawListener(this);
-                    //int h = topDescLayout.getMeasuredHeight();
-                    //int topLayoutDescRowHeight = h / 3; //Need to figure out if there is a way to dynamically get number of rows instead of hardcoding - JL
+                    for(int i = 0; i < listItemLayout.getChildCount(); i++) {
+                        View child = listItemLayout.getChildAt(i);
+                        // your processing...
+                    }
 
                     RelativeLayout rlTitle = view.findViewById(R.id.descriptionLayout_title);
                     RelativeLayout rlDesc = view.findViewById(R.id.descriptionLayout_desc);
