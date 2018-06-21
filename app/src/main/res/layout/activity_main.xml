@@ -48,6 +48,13 @@ android:padding="6dip"
             android:layout_alignParentTop="true"
             tools:context=".MainActivity">
 
+                <TextView
+                    android:id="@+id/titleTV"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:textSize="20sp"
+                    android:textColor="@android:color/white" />
+
             </RelativeLayout>
 
             <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -58,6 +65,13 @@ android:padding="6dip"
                 android:layout_below="@id/descriptionLayout_title"
                 android:layout_marginTop="-3dp"
                 tools:context=".MainActivity">
+
+                <TextView
+                    android:id="@+id/descTV"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:textSize="15sp"
+                    android:textColor="@android:color/white" />
 
             </RelativeLayout>
 
@@ -93,6 +107,22 @@ android:padding="6dip"
                 android:layout_alignParentStart="true"
                 android:layout_below="@id/descriptionLayout_age"
                 tools:context=".MainActivity">
+
+                <TextView
+                    android:id="@+id/maleTV"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:textSize="20sp"
+                    android:gravity="start"
+                    android:textColor="@android:color/white" />
+
+                <TextView
+                    android:id="@+id/femaleTV"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:textSize="20sp"
+                    android:gravity="end"
+                    android:textColor="@color/colorAccent" />
 
             </RelativeLayout>
 

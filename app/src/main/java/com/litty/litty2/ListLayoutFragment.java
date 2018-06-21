@@ -4,7 +4,6 @@ import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -98,25 +97,40 @@ public class ListLayoutFragment extends Fragment {
                 TextView titleTV = new TextView(getContext());
                 titleTV.setText(location.locationName());
                 titleTV.setTextColor(Color.WHITE);
-                titleTV.setLayoutParams(textTitleParams);
                 titleTV.setTextSize(20);
+                titleTV.setTag("titleTV");
+                titleTV.setLayoutParams(textTitleParams);
                 listLayoutItem.addView(titleTV);
 
                 TextView descTV = new TextView(getContext());
                 descTV.setText(location.locationDesc());
                 descTV.setTextColor(Color.WHITE);
+                descTV.setTag("descTV");
                 descTV.setLayoutParams(textDescParams);
                 listLayoutItem.addView(descTV);
 
                 ImageView liPhoto = new ImageView(getContext());
                 liPhoto.setImageResource(R.drawable.leopard);
+                liPhoto.setTag("liPhoto");
                 liPhoto.setLayoutParams(imageParams);
                 listLayoutItem.addView(liPhoto);
+
+                TextView maleTV = new TextView(getContext());
+                maleTV.setText(String.valueOf(Math.round(((double)location.mCount()/(double)location.mfCount())*100)));
+                maleTV.setTag("maleTV");
+                listLayoutItem.addView(maleTV);
+
+                TextView femaleTV = new TextView(getContext());
+                femaleTV.setText(String.valueOf(Math.round(((double)location.fCount()/(double)location.mfCount())*100)));
+                femaleTV.setTag("femaleTV");
+                listLayoutItem.addView(femaleTV);
 
                 listLayoutItem.setOnClickListener(new View.OnClickListener(){
                     @Override
                     public void onClick(View v){
                         setTopLayout(getView(), (RelativeLayout)v);
+                        ViewGroup vg = getView().findViewById (R.id.topLayout);
+                        vg.invalidate();
                     }
                 });
 
@@ -136,9 +150,30 @@ public class ListLayoutFragment extends Fragment {
             vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
                 public boolean onPreDraw() {
                     topDescLayout.getViewTreeObserver().removeOnPreDrawListener(this);
+                    TextView titleTV = view.findViewById(R.id.titleTV);
+                    TextView descTV = view.findViewById(R.id.descTV);
+                    ImageView topImage = view.findViewById(R.id.topImage);
+                    TextView maleTV = view.findViewById(R.id.maleTV);
+                    TextView femaleTV = view.findViewById(R.id.femaleTV);
+
                     for(int i = 0; i < listItemLayout.getChildCount(); i++) {
                         View child = listItemLayout.getChildAt(i);
-                        // your processing...
+
+                        if (child.getTag() == "titleTV")
+                            titleTV.setText(((TextView)child).getText());
+
+                        if (child.getTag() == "descTV")
+                            descTV.setText(((TextView)child).getText());
+
+                        // Need to figure out how to store the location pictures and get the set of images from layout list item
+                     //   if (child.getTag() == "liPhoto")
+                     //       topImage.setImageDrawable(((ImageView)child).getDrawable());
+
+                        if (child.getTag() == "maleTV")
+                            maleTV.setText(((TextView)child).getText());
+
+                        if (child.getTag() == "femaleTV")
+                            femaleTV.setText(((TextView)child).getText());
                     }
 
                     RelativeLayout rlTitle = view.findViewById(R.id.descriptionLayout_title);
@@ -147,39 +182,6 @@ public class ListLayoutFragment extends Fragment {
                     RelativeLayout rlRace = view.findViewById(R.id.descriptionLayout_race);
                     RelativeLayout rlAge = view.findViewById(R.id.descriptionLayout_age);
                     RelativeLayout rlGender = view.findViewById(R.id.descriptionLayout_gender);
-
-                    TextView titleTV = new TextView(getContext());
-                    titleTV.setText(String.valueOf(50));
-                    titleTV.setTextColor(Color.WHITE);
-                    titleTV.setTextSize(20);
-                    rlTitle.addView(titleTV);
-
-                    TextView descTV = new TextView(getContext());
-                    descTV.setText(String.valueOf(50));
-                    descTV.setTextColor(Color.WHITE);
-                    descTV.setTextSize(15);
-                    rlDesc.addView(descTV);
-
-                    RelativeLayout.LayoutParams genderParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
-
-                    //genderParams.setMargins(21, 20, 0, 0);
-                    TextView maleTV = new TextView(getContext());
-                    maleTV.setText(String.valueOf(50));
-                    maleTV.setTextColor(Color.WHITE);
-                    maleTV.setTextSize(20);
-                    maleTV.setGravity(Gravity.LEFT);
-                    maleTV.setLayoutParams(genderParams);
-                    rlGender.addView(maleTV);
-
-                    //genderParams.setMargins(0, 0, 0, 0);
-                    TextView femaleTV = new TextView(getContext());
-                    femaleTV.setText(String.valueOf(50));
-                    femaleTV.setTextColor(Color.RED);
-                    femaleTV.setTextSize(20);
-                    femaleTV.setGravity(Gravity.RIGHT);
-                    femaleTV.setLayoutParams(genderParams);
-                    rlGender.addView(femaleTV);
-
 
                     ImageView liPhoto = view.findViewById(R.id.topImage);
                     liPhoto.setImageResource(R.drawable.leopard);
