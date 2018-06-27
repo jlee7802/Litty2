@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -41,7 +42,7 @@ public class ListLayoutFragment extends Fragment {
 
                     // Display top location from location list on topLayout
                     int id = getResources().getIdentifier(String.valueOf(1), "id", getActivity().getPackageName());
-                    setTopLayout(view, (RelativeLayout)view.findViewById(id));
+                    setTopLayout(view, (RelativeLayout) getView().findViewById(R.id.listLayout).findViewById(id));
                 }
             });
         }
@@ -92,7 +93,7 @@ public class ListLayoutFragment extends Fragment {
 
                 imageParams.setMargins(8,21,8,21);
                 textTitleParams.setMargins(imageWidth + 100, 20, 8, 130);
-                textDescParams.setMargins(imageWidth + 100,100, 8, 30);
+                textDescParams.setMargins(imageWidth + 100, 100, 8, 30);
 
                 TextView titleTV = new TextView(getContext());
                 titleTV.setText(location.locationName());
@@ -125,12 +126,27 @@ public class ListLayoutFragment extends Fragment {
                 femaleTV.setTag("femaleTV");
                 listLayoutItem.addView(femaleTV);
 
+                TextView addressTV = new TextView(getContext());
+                addressTV.setText(location.address());
+                addressTV.setTag("addressTV");
+                listLayoutItem.addView(addressTV);
+
+                TextView businessHoursTV = new TextView(getContext());
+                businessHoursTV.setText(location.businessHours());
+                businessHoursTV.setTag("businessHoursTV");
+                listLayoutItem.addView(businessHoursTV);
+
                 listLayoutItem.setOnClickListener(new View.OnClickListener(){
                     @Override
                     public void onClick(View v){
-                        setTopLayout(getView(), (RelativeLayout)v);
-                        ViewGroup vg = getView().findViewById (R.id.topLayout);
-                        vg.invalidate();
+                        try {
+                            setTopLayout(getView(), (RelativeLayout) v);
+                            ViewGroup vg = getView().findViewById(R.id.topLayout);
+                            vg.invalidate();
+                        }
+                        catch(Exception e){
+                            String af = e.getMessage();
+                        }
                     }
                 });
 
@@ -152,9 +168,11 @@ public class ListLayoutFragment extends Fragment {
                     topDescLayout.getViewTreeObserver().removeOnPreDrawListener(this);
                     TextView titleTV = view.findViewById(R.id.titleTV);
                     TextView descTV = view.findViewById(R.id.descTV);
-                    ImageView topImage = view.findViewById(R.id.topImage);
+                    //ImageView topImage = view.findViewById(R.id.topImage);
                     TextView maleTV = view.findViewById(R.id.maleTV);
                     TextView femaleTV = view.findViewById(R.id.femaleTV);
+                    TextView addressTV = view.findViewById(R.id.addressTV);
+                    TextView businessHoursTV = view.findViewById(R.id.businessHoursTV);
 
                     for(int i = 0; i < listItemLayout.getChildCount(); i++) {
                         View child = listItemLayout.getChildAt(i);
@@ -165,7 +183,7 @@ public class ListLayoutFragment extends Fragment {
                         if (child.getTag() == "descTV")
                             descTV.setText(((TextView)child).getText());
 
-                        // Need to figure out how to store the location pictures and get the set of images from layout list item
+                        // Need to figure out how to store the location pictures and get the set of images from layout list item. Or just add the google maps image
                      //   if (child.getTag() == "liPhoto")
                      //       topImage.setImageDrawable(((ImageView)child).getDrawable());
 
@@ -174,6 +192,12 @@ public class ListLayoutFragment extends Fragment {
 
                         if (child.getTag() == "femaleTV")
                             femaleTV.setText(((TextView)child).getText());
+
+                        if (child.getTag() == "addressTV")
+                            addressTV.setText(((TextView)child).getText());
+
+                        if (child.getTag() == "businessHoursTV")
+                            businessHoursTV.setText(((TextView)child).getText());
                     }
 
                     RelativeLayout rlTitle = view.findViewById(R.id.descriptionLayout_title);
@@ -183,8 +207,8 @@ public class ListLayoutFragment extends Fragment {
                     RelativeLayout rlAge = view.findViewById(R.id.descriptionLayout_age);
                     RelativeLayout rlGender = view.findViewById(R.id.descriptionLayout_gender);
 
-                    ImageView liPhoto = view.findViewById(R.id.topImage);
-                    liPhoto.setImageResource(R.drawable.leopard);
+                    //ImageView liPhoto = view.findViewById(R.id.topImage);
+                    //liPhoto.setImageResource(R.drawable.leopard);
 
                     return true;
                 }

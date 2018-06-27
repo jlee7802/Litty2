@@ -2,6 +2,7 @@ package com.litty.litty2;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.location.Address;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.support.v4.app.ActivityCompat;
@@ -17,6 +18,7 @@ import android.content.pm.PackageManager;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.LinearLayout;
+import android.location.Geocoder;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.os.Parcelable;
@@ -36,7 +38,14 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.gson.reflect.TypeToken;
+import com.google.android.gms.maps.SupportMapFragment;
+
 import com.litty.userLocationPackage.MyLambdaDataBinder;
 import com.litty.userLocationPackage.locationObj;
 import com.litty.userLocationPackage.locationObjParcelable;
@@ -46,9 +55,10 @@ import com.litty.userLocationPackage.userLocationInterface;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements
-        ConnectionCallbacks, OnConnectionFailedListener, LocationListener{
+        ConnectionCallbacks, OnConnectionFailedListener, LocationListener, OnMapReadyCallback {
 
     public FusedLocationProviderClient mFusedLocationClient;
     public Location mCurrentLocation;
@@ -60,6 +70,13 @@ public class MainActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_main);
 
         /*ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);*/
+
+        // Retrieve the content view that renders the map.
+        // Get the SupportMapFragment and request notification
+        // when the map is ready to be used.
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
 
         // Create layouts and widgets for mainActivity
         LinearLayout mainLayout = findViewById(R.id.mainLayout);
@@ -89,6 +106,13 @@ public class MainActivity extends AppCompatActivity implements
 
                         // Need to create write to aws database here by invoking lambda function to updateUserLocation
                         try {
+                            Geocoder geocoder = new Geocoder(MainActivity.this, Locale.getDefault());
+                            List<Address> addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 5);
+                            for (Address a : addresses) {
+                                String me = a.getFeatureName();
+                            }
+
+
                             new locationTask(MainActivity.this, location).execute(uLocation);
                         }
                         catch (Exception e){
@@ -128,6 +152,16 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onConnectionSuspended(int cause) {
 
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        // Add a marker in Sydney, Australia,
+        // and move the map's camera to the same location.
+        LatLng sydney = new LatLng(-33.852, 151.211);
+        googleMap.addMarker(new MarkerOptions().position(sydney)
+                .title("Marker in Sydney"));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     }
 
     // async task to store location on user (latitude and longitude) in users table
