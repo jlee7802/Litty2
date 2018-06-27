@@ -9,13 +9,17 @@ public class locationObj implements Parcelable {
     private int fCount;
     private int mfCount;
     private String locationDesc;
+    private String address;
+    private String businessHours;
 
-    public locationObj(String locationName, int mCount, int fCount, int mfCount, String locationDesc) {
+    public locationObj(String locationName, int mCount, int fCount, int mfCount, String locationDesc, String address, String businessHours) {
         this.locationName = locationName;
         this.mCount = mCount;
         this.fCount = fCount;
         this.mfCount = mfCount;
         this.locationDesc = locationDesc;
+        this.address = address;
+        this.businessHours = businessHours;
     }
 
     public locationObj(Parcel source) {
@@ -49,6 +53,14 @@ public class locationObj implements Parcelable {
 
     public String locationDesc() {
         return locationDesc;
+    }
+
+    public String address() {
+        return address;
+    }
+
+    public String businessHours() {
+        return businessHours;
     }
 
     @Override
