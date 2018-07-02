@@ -1,24 +1,37 @@
 package com.litty.litty2;
 
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.litty.userLocationPackage.locationObj;
 import com.litty.userLocationPackage.locationObjParcelable;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class ListLayoutFragment extends Fragment {
+public class ListLayoutFragment extends Fragment implements OnMapReadyCallback {
+
+    public List<locationObj> topLocationList = new ArrayList<>();
+    public double topLat;
+    public double topLong;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -55,6 +68,7 @@ public class ListLayoutFragment extends Fragment {
     public void setLocationListLayout(RelativeLayout listLayout, List<locationObj> locationList, View view) {
         // Number of rows should be 24 initially but if the user scrolls down and reaches the end then we need to add more list items to relative layout listLayout - JL
         int layoutId = View.generateViewId();
+        topLocationList = locationList;
 
         // Dynamically create the list items in ListLayout
         try {
@@ -87,11 +101,11 @@ public class ListLayoutFragment extends Fragment {
                 int liWidth  = layout.getMeasuredWidth();
                 int imageWidth = liWidth/4;
 
-                RelativeLayout.LayoutParams imageParams = new RelativeLayout.LayoutParams(imageWidth, ViewGroup.LayoutParams.MATCH_PARENT);
+                RelativeLayout.LayoutParams mapParams = new RelativeLayout.LayoutParams(imageWidth, ViewGroup.LayoutParams.MATCH_PARENT);
                 RelativeLayout.LayoutParams textTitleParams = new RelativeLayout.LayoutParams(liWidth - imageWidth, ViewGroup.LayoutParams.MATCH_PARENT);
                 RelativeLayout.LayoutParams textDescParams = new RelativeLayout.LayoutParams(liWidth - imageWidth, ViewGroup.LayoutParams.MATCH_PARENT);
 
-                imageParams.setMargins(8,21,8,21);
+                mapParams.setMargins(8,21,8,21);
                 textTitleParams.setMargins(imageWidth + 100, 20, 8, 130);
                 textDescParams.setMargins(imageWidth + 100, 100, 8, 30);
 
@@ -109,12 +123,6 @@ public class ListLayoutFragment extends Fragment {
                 descTV.setTag("descTV");
                 descTV.setLayoutParams(textDescParams);
                 listLayoutItem.addView(descTV);
-
-                ImageView liPhoto = new ImageView(getContext());
-                liPhoto.setImageResource(R.drawable.leopard);
-                liPhoto.setTag("liPhoto");
-                liPhoto.setLayoutParams(imageParams);
-                listLayoutItem.addView(liPhoto);
 
                 TextView maleTV = new TextView(getContext());
                 maleTV.setText(String.valueOf(Math.round(((double)location.mCount()/(double)location.mfCount())*100)));
@@ -135,6 +143,17 @@ public class ListLayoutFragment extends Fragment {
                 businessHoursTV.setText(location.businessHours());
                 businessHoursTV.setTag("businessHoursTV");
                 listLayoutItem.addView(businessHoursTV);
+
+                TextView idTV = new TextView(getContext());
+                businessHoursTV.setText(String.valueOf(location.locationId()));
+                businessHoursTV.setTag("idTV");
+                listLayoutItem.addView(idTV);
+
+                // Set the latitude and longitude for location obj with the lat/long from db.
+                // This will be used to create the map in the topLayout when the onMapReady listener is called.
+                //locationObj locationObj = new locationObj(location.locationId(), location.locationName(), location.mCount(), location.fCount(), location.mfCount(), location.locationDesc(),
+                //        location.address(), location.businessHours(), location.locationLat(), location.locationLong()); // Need to put the other fields in this object instead of putting them in textviews, delete the textviews
+               // topLocationList.add(locationObj);
 
                 listLayoutItem.setOnClickListener(new View.OnClickListener(){
                     @Override
@@ -162,13 +181,26 @@ public class ListLayoutFragment extends Fragment {
     public void setTopLayout(final View view, final RelativeLayout listItemLayout) {
         try {
             final RelativeLayout topDescLayout = view.findViewById(R.id.descriptionLayout);
+            TextView id;
+            for (locationObj obj : topLocationList){
+                id = listItemLayout.findViewWithTag("idTV");
+                if (obj.locationId() == Integer.parseInt(id.getText().toString()))
+                {
+                    topLat = obj.locationLat();
+                    topLong = obj.locationLong();
+                    break;
+                }
+            }
+
+            SupportMapFragment mapFragment = (SupportMapFragment) getActivity().getSupportFragmentManager().findFragmentById(R.id.map);
+            mapFragment.getMapAsync(this);
+
             ViewTreeObserver vto = topDescLayout.getViewTreeObserver();
             vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
                 public boolean onPreDraw() {
                     topDescLayout.getViewTreeObserver().removeOnPreDrawListener(this);
                     TextView titleTV = view.findViewById(R.id.titleTV);
                     TextView descTV = view.findViewById(R.id.descTV);
-                    //ImageView topImage = view.findViewById(R.id.topImage);
                     TextView maleTV = view.findViewById(R.id.maleTV);
                     TextView femaleTV = view.findViewById(R.id.femaleTV);
                     TextView addressTV = view.findViewById(R.id.addressTV);
@@ -182,10 +214,6 @@ public class ListLayoutFragment extends Fragment {
 
                         if (child.getTag() == "descTV")
                             descTV.setText(((TextView)child).getText());
-
-                        // Need to figure out how to store the location pictures and get the set of images from layout list item. Or just add the google maps image
-                     //   if (child.getTag() == "liPhoto")
-                     //       topImage.setImageDrawable(((ImageView)child).getDrawable());
 
                         if (child.getTag() == "maleTV")
                             maleTV.setText(((TextView)child).getText());
@@ -207,9 +235,6 @@ public class ListLayoutFragment extends Fragment {
                     RelativeLayout rlAge = view.findViewById(R.id.descriptionLayout_age);
                     RelativeLayout rlGender = view.findViewById(R.id.descriptionLayout_gender);
 
-                    //ImageView liPhoto = view.findViewById(R.id.topImage);
-                    //liPhoto.setImageResource(R.drawable.leopard);
-
                     return true;
                 }
             });
@@ -217,5 +242,16 @@ public class ListLayoutFragment extends Fragment {
         catch(Exception e) {
             String mes = e.getMessage();
         }
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        // Add a marker in Sydney, Australia,
+        // and move the map's camera to the same location.
+        LatLng sydney = new LatLng(-33.8520, 151.2110);
+        if (ContextCompat.checkSelfPermission( getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION ) == PackageManager.PERMISSION_GRANTED )
+            googleMap.setMyLocationEnabled(true);
+        googleMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     }
 }
