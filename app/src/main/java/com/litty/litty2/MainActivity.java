@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.location.Address;
 import android.location.Location;
 import android.os.AsyncTask;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -69,14 +70,7 @@ public class MainActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        /*ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);*/
-
-        // Retrieve the content view that renders the map.
-        // Get the SupportMapFragment and request notification
-        // when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+        //ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
 
         // Create layouts and widgets for mainActivity
         LinearLayout mainLayout = findViewById(R.id.mainLayout);
@@ -91,8 +85,8 @@ public class MainActivity extends AppCompatActivity implements
         // If permission granted then start location update. -JL
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             LocationRequest mLocationRequest = new LocationRequest();
-            mLocationRequest.setInterval(10000);
-            mLocationRequest.setFastestInterval(50000);
+            mLocationRequest.setInterval(100000);
+            mLocationRequest.setFastestInterval(500000);
             mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
             LocationCallback mLocationCallback = new LocationCallback() {
@@ -106,12 +100,11 @@ public class MainActivity extends AppCompatActivity implements
 
                         // Need to create write to aws database here by invoking lambda function to updateUserLocation
                         try {
-                            Geocoder geocoder = new Geocoder(MainActivity.this, Locale.getDefault());
+                            /*Geocoder geocoder = new Geocoder(MainActivity.this, Locale.getDefault());
                             List<Address> addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 5);
                             for (Address a : addresses) {
                                 String me = a.getFeatureName();
-                            }
-
+                            }*/
 
                             new locationTask(MainActivity.this, location).execute(uLocation);
                         }

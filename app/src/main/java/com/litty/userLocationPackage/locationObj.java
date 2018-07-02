@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class locationObj implements Parcelable {
+    private int locationId;
     private String locationName;
     private int mCount;
     private int fCount;
@@ -11,8 +12,11 @@ public class locationObj implements Parcelable {
     private String locationDesc;
     private String address;
     private String businessHours;
+    private double locationLat;
+    private double locationLong;
 
-    public locationObj(String locationName, int mCount, int fCount, int mfCount, String locationDesc, String address, String businessHours) {
+    public locationObj(int locationId, String locationName, int mCount, int fCount, int mfCount, String locationDesc, String address, String businessHours, double locationLat, double locationLong) {
+        this.locationId = locationId;
         this.locationName = locationName;
         this.mCount = mCount;
         this.fCount = fCount;
@@ -20,6 +24,8 @@ public class locationObj implements Parcelable {
         this.locationDesc = locationDesc;
         this.address = address;
         this.businessHours = businessHours;
+        this.locationLat = locationLat;
+        this.locationLong = locationLong;
     }
 
     public locationObj(Parcel source) {
@@ -34,6 +40,8 @@ public class locationObj implements Parcelable {
     public int describeContents() {
         return 0;
     }
+
+    public int locationId() { return locationId; }
 
     public String locationName() {
         return locationName;
@@ -62,6 +70,10 @@ public class locationObj implements Parcelable {
     public String businessHours() {
         return businessHours;
     }
+
+    public double locationLat() { return locationLat; }
+
+    public double locationLong() { return locationLong; }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
