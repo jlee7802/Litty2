@@ -10,15 +10,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.litty.userLocationPackage.locationObj;
 import com.litty.userLocationPackage.locationObjParcelable;
@@ -38,6 +39,9 @@ public class ListLayoutFragment extends Fragment implements OnMapReadyCallback {
 
         final View view = inflater.inflate(R.layout.activity_main, container, false);
         final RelativeLayout listLayout = view.findViewById(R.id.listLayout);
+
+        //SupportMapFragment mapFragment = (SupportMapFragment) this.getChildFragmentManager().findFragmentById(R.id.map);
+        //mapFragment.getMapAsync(this);
 
         // Retrieve Parcelable object containing list of locations from Main Activity
         Bundle bundle = this.getArguments();
@@ -192,7 +196,7 @@ public class ListLayoutFragment extends Fragment implements OnMapReadyCallback {
                 }
             }
 
-            SupportMapFragment mapFragment = (SupportMapFragment) getActivity().getSupportFragmentManager().findFragmentById(R.id.map);
+            SupportMapFragment mapFragment = (SupportMapFragment) this.getChildFragmentManager().findFragmentById(R.id.map);
             mapFragment.getMapAsync(this);
 
             ViewTreeObserver vto = topDescLayout.getViewTreeObserver();
@@ -248,10 +252,11 @@ public class ListLayoutFragment extends Fragment implements OnMapReadyCallback {
     public void onMapReady(GoogleMap googleMap) {
         // Add a marker in Sydney, Australia,
         // and move the map's camera to the same location.
-        LatLng sydney = new LatLng(-33.8520, 151.2110);
+        LatLng sydney = new LatLng(topLat, topLong);
         if (ContextCompat.checkSelfPermission( getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION ) == PackageManager.PERMISSION_GRANTED )
             googleMap.setMyLocationEnabled(true);
         googleMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+
         googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     }
 }
