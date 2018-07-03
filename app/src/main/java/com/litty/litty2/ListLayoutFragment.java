@@ -30,6 +30,7 @@ import java.util.List;
 public class ListLayoutFragment extends Fragment implements OnMapReadyCallback {
 
     public List<locationObj> topLocationList = new ArrayList<>();
+    public locationObj currLocObj = new locationObj();
     public double topLat;
     public double topLong;
 
@@ -128,29 +129,9 @@ public class ListLayoutFragment extends Fragment implements OnMapReadyCallback {
                 descTV.setLayoutParams(textDescParams);
                 listLayoutItem.addView(descTV);
 
-                TextView maleTV = new TextView(getContext());
-                maleTV.setText(String.valueOf(Math.round(((double)location.mCount()/(double)location.mfCount())*100)));
-                maleTV.setTag("maleTV");
-                listLayoutItem.addView(maleTV);
-
-                TextView femaleTV = new TextView(getContext());
-                femaleTV.setText(String.valueOf(Math.round(((double)location.fCount()/(double)location.mfCount())*100)));
-                femaleTV.setTag("femaleTV");
-                listLayoutItem.addView(femaleTV);
-
-                TextView addressTV = new TextView(getContext());
-                addressTV.setText(location.address());
-                addressTV.setTag("addressTV");
-                listLayoutItem.addView(addressTV);
-
-                TextView businessHoursTV = new TextView(getContext());
-                businessHoursTV.setText(location.businessHours());
-                businessHoursTV.setTag("businessHoursTV");
-                listLayoutItem.addView(businessHoursTV);
-
                 TextView idTV = new TextView(getContext());
-                businessHoursTV.setText(String.valueOf(location.locationId()));
-                businessHoursTV.setTag("idTV");
+                idTV.setText(String.valueOf(location.locationId()));
+                idTV.setTag("idTV");
                 listLayoutItem.addView(idTV);
 
                 // Set the latitude and longitude for location obj with the lat/long from db.
@@ -190,8 +171,7 @@ public class ListLayoutFragment extends Fragment implements OnMapReadyCallback {
                 id = listItemLayout.findViewWithTag("idTV");
                 if (obj.locationId() == Integer.parseInt(id.getText().toString()))
                 {
-                    topLat = obj.locationLat();
-                    topLong = obj.locationLong();
+                    currLocObj = obj;
                     break;
                 }
             }
@@ -210,27 +190,12 @@ public class ListLayoutFragment extends Fragment implements OnMapReadyCallback {
                     TextView addressTV = view.findViewById(R.id.addressTV);
                     TextView businessHoursTV = view.findViewById(R.id.businessHoursTV);
 
-                    for(int i = 0; i < listItemLayout.getChildCount(); i++) {
-                        View child = listItemLayout.getChildAt(i);
-
-                        if (child.getTag() == "titleTV")
-                            titleTV.setText(((TextView)child).getText());
-
-                        if (child.getTag() == "descTV")
-                            descTV.setText(((TextView)child).getText());
-
-                        if (child.getTag() == "maleTV")
-                            maleTV.setText(((TextView)child).getText());
-
-                        if (child.getTag() == "femaleTV")
-                            femaleTV.setText(((TextView)child).getText());
-
-                        if (child.getTag() == "addressTV")
-                            addressTV.setText(((TextView)child).getText());
-
-                        if (child.getTag() == "businessHoursTV")
-                            businessHoursTV.setText(((TextView)child).getText());
-                    }
+                    titleTV.setText(currLocObj.locationName());
+                    descTV.setText(currLocObj.locationDesc());
+                    maleTV.setText(String.valueOf(Math.round(((double)currLocObj.mCount()/(double)currLocObj.mfCount())*100)));
+                    femaleTV.setText(String.valueOf(Math.round(((double)currLocObj.fCount()/(double)currLocObj.mfCount())*100)));
+                    addressTV.setText(currLocObj.address());
+                    businessHoursTV.setText(currLocObj.businessHours());
 
                     RelativeLayout rlTitle = view.findViewById(R.id.descriptionLayout_title);
                     RelativeLayout rlDesc = view.findViewById(R.id.descriptionLayout_desc);
@@ -252,7 +217,7 @@ public class ListLayoutFragment extends Fragment implements OnMapReadyCallback {
     public void onMapReady(GoogleMap googleMap) {
         // Add a marker in Sydney, Australia,
         // and move the map's camera to the same location.
-        LatLng sydney = new LatLng(topLat, topLong);
+        LatLng sydney = new LatLng(currLocObj.locationLat(), currLocObj.locationLong());
         if (ContextCompat.checkSelfPermission( getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION ) == PackageManager.PERMISSION_GRANTED )
             googleMap.setMyLocationEnabled(true);
         googleMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));

@@ -15,6 +15,10 @@ public class locationObj implements Parcelable {
     private double locationLat;
     private double locationLong;
 
+    public locationObj(){
+
+    }
+
     public locationObj(int locationId, String locationName, int mCount, int fCount, int mfCount, String locationDesc, String address, String businessHours, double locationLat, double locationLong) {
         this.locationId = locationId;
         this.locationName = locationName;
