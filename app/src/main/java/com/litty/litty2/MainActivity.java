@@ -1,5 +1,6 @@
 package com.litty.litty2;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.location.Address;
@@ -25,6 +26,7 @@ import android.widget.TextView;
 import android.os.Parcelable;
 
 import static android.os.Debug.waitForDebugger;
+import static com.google.android.gms.location.LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY;
 
 import com.amazonaws.mobileconnectors.lambdainvoker.*;
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
@@ -53,7 +55,14 @@ import com.litty.userLocationPackage.locationObjParcelable;
 import com.litty.userLocationPackage.userLocation;
 import com.litty.userLocationPackage.userLocationInterface;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -64,6 +73,8 @@ public class MainActivity extends AppCompatActivity implements
     public FusedLocationProviderClient mFusedLocationClient;
     public Location mCurrentLocation;
     public static userLocation uLocation;
+    //public String googleMapsURL = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json?";
+    //TextView txtJson;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,8 +96,8 @@ public class MainActivity extends AppCompatActivity implements
         // If permission granted then start location update. -JL
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             LocationRequest mLocationRequest = new LocationRequest();
-            mLocationRequest.setInterval(100000);
-            mLocationRequest.setFastestInterval(500000);
+            mLocationRequest.setInterval(1000);
+            mLocationRequest.setFastestInterval(5000);
             mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
             LocationCallback mLocationCallback = new LocationCallback() {
@@ -105,6 +116,7 @@ public class MainActivity extends AppCompatActivity implements
                             for (Address a : addresses) {
                                 String me = a.getFeatureName();
                             }*/
+                            //getGoogleMapsData(location);
 
                             new locationTask(MainActivity.this, location).execute(uLocation);
                         }
@@ -117,6 +129,7 @@ public class MainActivity extends AppCompatActivity implements
             };
 
             mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, null);
+
             new getTopLocationsTask(this).execute();
         }
         else {
@@ -184,7 +197,7 @@ public class MainActivity extends AppCompatActivity implements
             // invoke "userLocationInterface" method. In case it fails, it will throw a
             // LambdaFunctionException.
             try {
-                //waitForDebugger();
+                waitForDebugger();
                 return userLocationInterface.updateUserLocation(params[0]);
             } catch (LambdaFunctionException lfe) {
                 Log.e("TAG", "Failed to invoke updateUserLocation", lfe);
@@ -201,20 +214,26 @@ public class MainActivity extends AppCompatActivity implements
 
         // only retain a weak reference to the activity
         getTopLocationsTask(MainActivity context) {
-            activityReference = new WeakReference<>(context);
+            try {
+                activityReference = new WeakReference<>(context);
 
-            // Create an instance of CognitoCachingCredentialsProvider
-            CognitoCachingCredentialsProvider credentialsProvider = new CognitoCachingCredentialsProvider(
-                    context.getApplicationContext(), "us-east-1:caa8736d-fa24-483f-bf6a-4ee5b4da1436", Regions.US_EAST_1);
+                // Create an instance of CognitoCachingCredentialsProvider
+                CognitoCachingCredentialsProvider credentialsProvider = new CognitoCachingCredentialsProvider(
+                        context.getApplicationContext(), "us-east-1:caa8736d-fa24-483f-bf6a-4ee5b4da1436", Regions.US_EAST_1);
 
-            // Create LambdaInvokerFactory, to be used to instantiate the Lambda proxy.
-            LambdaInvokerFactory factory = new LambdaInvokerFactory(context.getApplicationContext(), Regions.US_EAST_1, credentialsProvider);
+                // Create LambdaInvokerFactory, to be used to instantiate the Lambda proxy.
+                LambdaInvokerFactory factory = new LambdaInvokerFactory(context.getApplicationContext(), Regions.US_EAST_1, credentialsProvider);
 
-            // Create the Lambda proxy object with default Json data binder.
-            // You can provide your own data binder by implementing
-            // LambdaDataBinder.  This is important because the return type will be LinkedTreeMap so
-            // you need to change it to the correct class type by using LambdaDataBinder - JL
-            userLocationInterface = factory.build(userLocationInterface.class, new MyLambdaDataBinder(new TypeToken<List<locationObj>>() {}.getType()));
+                // Create the Lambda proxy object with default Json data binder.
+                // You can provide your own data binder by implementing
+                // LambdaDataBinder.  This is important because the return type will be LinkedTreeMap so
+                // you need to change it to the correct class type by using LambdaDataBinder - JL
+                userLocationInterface = factory.build(userLocationInterface.class, new MyLambdaDataBinder(new TypeToken<List<locationObj>>() {
+                }.getType()));
+            }
+            catch(Exception e) {
+                String mes  = e.getMessage();
+            }
         }
 
         @Override
@@ -254,4 +273,69 @@ public class MainActivity extends AppCompatActivity implements
             fragment.setArguments(bundle);
         }
     }
+
+    // Method to get the Google Maps data after making call to API with user's location data
+   /* protected void getGoogleMapsData(Location location) {
+        String gmURL = googleMapsURL + "input=bar&inputtype=textquery&language=en&fields=id,name,formatted_address&locationbias=circle:200@40.7739931,-73.952325&key=AIzaSyCbtL331iP2ok4j8ZMwi4A7LrIhFCDvqnk";
+        new JsonTask().execute(gmURL);
+    }
+
+    private class JsonTask extends AsyncTask<String, String, String> {
+
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+            // Show progress dialog box here, in this case it will be a page
+            // where we show the loading bar. Still need to create the loading page - JL
+        }
+
+        protected String doInBackground(String... params) {
+            HttpURLConnection connection = null;
+            BufferedReader reader = null;
+
+            try {
+                URL url = new URL(params[0]);
+                connection = (HttpURLConnection) url.openConnection();
+                connection.connect();
+
+                InputStream stream = connection.getInputStream();
+
+                reader = new BufferedReader(new InputStreamReader(stream));
+
+                StringBuffer buffer = new StringBuffer();
+                String line;
+
+                while ((line = reader.readLine()) != null) {
+                    buffer.append(line+"\n");
+                    Log.d("Response: ", "> " + line);   //here u ll get whole response...... :-)
+
+                }
+
+                return buffer.toString();
+
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (connection != null) {
+                    connection.disconnect();
+                }
+                try {
+                    if (reader != null) {
+                        reader.close();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+            txtJson.setText(result);
+        }
+    }*/
 }

@@ -15,7 +15,6 @@ import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
@@ -31,8 +30,6 @@ public class ListLayoutFragment extends Fragment implements OnMapReadyCallback {
 
     public List<locationObj> topLocationList = new ArrayList<>();
     public locationObj currLocObj = new locationObj();
-    public double topLat;
-    public double topLong;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
