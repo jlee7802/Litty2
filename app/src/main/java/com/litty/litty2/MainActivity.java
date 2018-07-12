@@ -17,16 +17,10 @@ import android.os.Bundle;
 import android.Manifest;
 import android.util.Log;
 import android.content.pm.PackageManager;
-import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.LinearLayout;
-import android.location.Geocoder;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.os.Parcelable;
 
 import static android.os.Debug.waitForDebugger;
-import static com.google.android.gms.location.LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY;
 
 import com.amazonaws.mobileconnectors.lambdainvoker.*;
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
@@ -34,6 +28,7 @@ import com.amazonaws.regions.Regions;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationAvailability;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationRequest;
@@ -41,13 +36,7 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.gson.reflect.TypeToken;
-import com.google.android.gms.maps.SupportMapFragment;
 
 import com.litty.userLocationPackage.MyLambdaDataBinder;
 import com.litty.userLocationPackage.locationObj;
@@ -63,18 +52,16 @@ import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements
-        ConnectionCallbacks, OnConnectionFailedListener, LocationListener, OnMapReadyCallback {
+        ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
 
     public FusedLocationProviderClient mFusedLocationClient;
     public Location mCurrentLocation;
     public static userLocation uLocation;
-    //public String googleMapsURL = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json?";
-    //TextView txtJson;
+    public String googleMapsURL = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json?";
+    TextView txtJson;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,8 +83,8 @@ public class MainActivity extends AppCompatActivity implements
         // If permission granted then start location update. -JL
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             LocationRequest mLocationRequest = new LocationRequest();
-            mLocationRequest.setInterval(1000);
-            mLocationRequest.setFastestInterval(5000);
+            mLocationRequest.setInterval(10000);
+            mLocationRequest.setFastestInterval(50000);
             mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
             LocationCallback mLocationCallback = new LocationCallback() {
@@ -125,6 +112,15 @@ public class MainActivity extends AppCompatActivity implements
                             String ee = e.getMessage();
                         }
                     }
+                }
+
+                @Override
+                public void onLocationAvailability(LocationAvailability locationAvailability) {
+                    Location l = new Location("");
+                    l.setLatitude(40.7755334);
+                    l.setLongitude(-73.9532487);
+                    new locationTask(MainActivity.this, l).execute(uLocation);
+                    getGoogleMapsData(l);
                 }
             };
 
@@ -158,16 +154,6 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onConnectionSuspended(int cause) {
 
-    }
-
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        // Add a marker in Sydney, Australia,
-        // and move the map's camera to the same location.
-        LatLng sydney = new LatLng(-33.852, 151.211);
-        googleMap.addMarker(new MarkerOptions().position(sydney)
-                .title("Marker in Sydney"));
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     }
 
     // async task to store location on user (latitude and longitude) in users table
@@ -275,9 +261,16 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     // Method to get the Google Maps data after making call to API with user's location data
-   /* protected void getGoogleMapsData(Location location) {
-        String gmURL = googleMapsURL + "input=bar&inputtype=textquery&language=en&fields=id,name,formatted_address&locationbias=circle:200@40.7739931,-73.952325&key=AIzaSyCbtL331iP2ok4j8ZMwi4A7LrIhFCDvqnk";
-        new JsonTask().execute(gmURL);
+    protected void getGoogleMapsData(Location location) {
+        //String gmURL = googleMapsURL + "input=bar&inputtype=textquery&language=en&fields=id,name,formatted_address&locationbias=circle:2000@40.7739931,-73.952325&key=AIzaSyCbtL331iP2ok4j8ZMwi4A7LrIhFCDvqnk";
+        StringBuilder sb = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
+        sb.append("location=" + location.getLatitude() + "," + location.getLongitude());
+        sb.append("&radius=7700");
+        sb.append("&types=" + "night_club");
+        sb.append("&sensor=true");
+        sb.append("&key=AIzaSyCbtL331iP2ok4j8ZMwi4A7LrIhFCDvqnk");
+
+        new JsonTask().execute(String.valueOf(sb));
     }
 
     private class JsonTask extends AsyncTask<String, String, String> {
@@ -337,5 +330,5 @@ public class MainActivity extends AppCompatActivity implements
             super.onPostExecute(result);
             txtJson.setText(result);
         }
-    }*/
+    }
 }
