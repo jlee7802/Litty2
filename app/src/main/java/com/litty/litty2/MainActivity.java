@@ -117,8 +117,8 @@ public class MainActivity extends AppCompatActivity implements
                 @Override
                 public void onLocationAvailability(LocationAvailability locationAvailability) {
                     Location l = new Location("");
-                    l.setLatitude(40.7755334);
-                    l.setLongitude(-73.9532487);
+                    l.setLatitude(40.7630525);
+                    l.setLongitude(-73.9721337);
                     new locationTask(MainActivity.this, l).execute(uLocation);
                     getGoogleMapsData(l);
                 }
@@ -265,7 +265,7 @@ public class MainActivity extends AppCompatActivity implements
         //String gmURL = googleMapsURL + "input=bar&inputtype=textquery&language=en&fields=id,name,formatted_address&locationbias=circle:2000@40.7739931,-73.952325&key=AIzaSyCbtL331iP2ok4j8ZMwi4A7LrIhFCDvqnk";
         StringBuilder sb = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
         sb.append("location=" + location.getLatitude() + "," + location.getLongitude());
-        sb.append("&radius=7700");
+        sb.append("&rankby=distance");
         sb.append("&types=" + "night_club");
         sb.append("&sensor=true");
         sb.append("&key=AIzaSyCbtL331iP2ok4j8ZMwi4A7LrIhFCDvqnk");
