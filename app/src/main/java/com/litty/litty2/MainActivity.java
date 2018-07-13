@@ -60,8 +60,6 @@ public class MainActivity extends AppCompatActivity implements
     public FusedLocationProviderClient mFusedLocationClient;
     public Location mCurrentLocation;
     public static userLocation uLocation;
-    public String googleMapsURL = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json?";
-    TextView txtJson;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -167,8 +165,7 @@ public class MainActivity extends AppCompatActivity implements
                     context.getApplicationContext(), "us-east-1:caa8736d-fa24-483f-bf6a-4ee5b4da1436", Regions.US_EAST_1);
 
             // Create LambdaInvokerFactory, to be used to instantiate the Lambda proxy.
-            LambdaInvokerFactory factory = new LambdaInvokerFactory(context.getApplicationContext(), Regions.US_EAST_1, credentialsProvider);
-            //LambdaInvokerFactory factory = LambdaInvokerFactory.build().context(context).region(Regions.US_EAST_1).credentialsProvider(credentialsProvider).build();
+            LambdaInvokerFactory factory = LambdaInvokerFactory.builder().context(context).region(Regions.US_EAST_1).credentialsProvider(credentialsProvider) .build();
 
             // Create the Lambda proxy object with default Json data binder.
             // You can provide your own data binder by implementing
@@ -208,7 +205,7 @@ public class MainActivity extends AppCompatActivity implements
                         context.getApplicationContext(), "us-east-1:caa8736d-fa24-483f-bf6a-4ee5b4da1436", Regions.US_EAST_1);
 
                 // Create LambdaInvokerFactory, to be used to instantiate the Lambda proxy.
-                LambdaInvokerFactory factory = new LambdaInvokerFactory(context.getApplicationContext(), Regions.US_EAST_1, credentialsProvider);
+                LambdaInvokerFactory factory = LambdaInvokerFactory.builder().context(context).region(Regions.US_EAST_1).credentialsProvider(credentialsProvider) .build();
 
                 // Create the Lambda proxy object with default Json data binder.
                 // You can provide your own data binder by implementing
@@ -262,7 +259,6 @@ public class MainActivity extends AppCompatActivity implements
 
     // Method to get the Google Maps data after making call to API with user's location data
     protected void getGoogleMapsData(Location location) {
-        //String gmURL = googleMapsURL + "input=bar&inputtype=textquery&language=en&fields=id,name,formatted_address&locationbias=circle:2000@40.7739931,-73.952325&key=AIzaSyCbtL331iP2ok4j8ZMwi4A7LrIhFCDvqnk";
         StringBuilder sb = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
         sb.append("location=" + location.getLatitude() + "," + location.getLongitude());
         sb.append("&rankby=distance");
@@ -327,8 +323,7 @@ public class MainActivity extends AppCompatActivity implements
 
         @Override
         protected void onPostExecute(String result) {
-            super.onPostExecute(result);
-            txtJson.setText(result);
+
         }
     }
 }
