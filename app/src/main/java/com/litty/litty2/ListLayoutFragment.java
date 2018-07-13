@@ -3,9 +3,11 @@ package com.litty.litty2;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +27,8 @@ import com.litty.userLocationPackage.locationObjParcelable;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static java.lang.Math.round;
 
 public class ListLayoutFragment extends Fragment implements OnMapReadyCallback {
 
@@ -99,17 +103,19 @@ public class ListLayoutFragment extends Fragment implements OnMapReadyCallback {
                 listLayout.addView(listLayoutItem);
 
                 // Add image and text for List item.
-                RelativeLayout layout = view.findViewById(R.id.listLayout);
+                RelativeLayout layout = view.findViewById(R.id.listLayout); // Do i need this? can't i just use the input parameter
                 int liWidth  = layout.getMeasuredWidth();
                 int imageWidth = liWidth/4;
 
                 RelativeLayout.LayoutParams mapParams = new RelativeLayout.LayoutParams(imageWidth, ViewGroup.LayoutParams.MATCH_PARENT);
-                RelativeLayout.LayoutParams textTitleParams = new RelativeLayout.LayoutParams(liWidth - imageWidth, ViewGroup.LayoutParams.MATCH_PARENT);
-                RelativeLayout.LayoutParams textDescParams = new RelativeLayout.LayoutParams(liWidth - imageWidth, ViewGroup.LayoutParams.MATCH_PARENT);
+                RelativeLayout.LayoutParams textTitleParams = new RelativeLayout.LayoutParams(liWidth/2, ViewGroup.LayoutParams.MATCH_PARENT);
+                RelativeLayout.LayoutParams textDescParams = new RelativeLayout.LayoutParams(liWidth/2, ViewGroup.LayoutParams.MATCH_PARENT);
+                RelativeLayout.LayoutParams distanceParams = new RelativeLayout.LayoutParams(imageWidth, ViewGroup.LayoutParams.MATCH_PARENT);
 
                 mapParams.setMargins(8,21,8,21);
                 textTitleParams.setMargins(imageWidth + 100, 20, 8, 130);
                 textDescParams.setMargins(imageWidth + 100, 100, 8, 30);
+                distanceParams.setMargins(imageWidth*3, 21, 8, 21);
 
                 TextView titleTV = new TextView(getContext());
                 titleTV.setText(location.locationName());
@@ -125,6 +131,16 @@ public class ListLayoutFragment extends Fragment implements OnMapReadyCallback {
                 descTV.setTag("descTV");
                 descTV.setLayoutParams(textDescParams);
                 listLayoutItem.addView(descTV);
+
+                //Calculate distance between user and each location in locationList
+                float[] distance = new float[1];
+                Location.distanceBetween(40.762954, -73.9712007,location.locationLat(), location.locationLong(),distance); // Need to get the users lat/long data for the first 2 params
+                TextView distanceTV = new TextView(getContext());
+                distanceTV.setText(String.valueOf(round(getMiles((Double.valueOf(distance[0])) * 100.0 / 100.0)))); // multiply meters by 0.000621371192 to convert meters to miles
+                distanceTV.setTextColor(Color.WHITE);
+                distanceTV.setTag("distanceTV");
+                distanceTV.setLayoutParams(distanceParams);
+                listLayoutItem.addView(distanceTV);
 
                 TextView idTV = new TextView(getContext());
                 idTV.setText(String.valueOf(location.locationId()));
@@ -189,8 +205,8 @@ public class ListLayoutFragment extends Fragment implements OnMapReadyCallback {
 
                     titleTV.setText(currLocObj.locationName());
                     descTV.setText(currLocObj.locationDesc());
-                    maleTV.setText(String.valueOf(Math.round(((double)currLocObj.mCount()/(double)currLocObj.mfCount())*100)));
-                    femaleTV.setText(String.valueOf(Math.round(((double)currLocObj.fCount()/(double)currLocObj.mfCount())*100)));
+                    maleTV.setText(String.valueOf(round(((double)currLocObj.mCount()/(double)currLocObj.mfCount())*100)));
+                    femaleTV.setText(String.valueOf(round(((double)currLocObj.fCount()/(double)currLocObj.mfCount())*100)));
                     addressTV.setText(currLocObj.address());
                     businessHoursTV.setText(currLocObj.businessHours());
 
@@ -220,5 +236,15 @@ public class ListLayoutFragment extends Fragment implements OnMapReadyCallback {
         googleMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
 
         googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+    }
+
+    // Convert meters to miles
+    public double getMiles(double i) {
+        return i*0.000621371192;
+    }
+
+    // Convert miles to meters
+    public double getMeters(double i) {
+        return i*1609.344;
     }
 }

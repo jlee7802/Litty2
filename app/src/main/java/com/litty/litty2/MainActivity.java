@@ -11,6 +11,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.JobIntentService;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -44,6 +45,10 @@ import com.litty.userLocationPackage.locationObjParcelable;
 import com.litty.userLocationPackage.userLocation;
 import com.litty.userLocationPackage.userLocationInterface;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,6 +57,7 @@ import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements
@@ -241,7 +247,9 @@ public class MainActivity extends AppCompatActivity implements
             MainActivity activity = activityReference.get();
             if (activity == null || activity.isFinishing()) return;
 
-            locationObjParcelable locationDetail = new locationObjParcelable(result);
+            // Use this if i need to pull the mfCount from our database in order to populate
+            // some of the fields in the locationObj. - JL
+          /*  locationObjParcelable locationDetail = new locationObjParcelable(result);
 
             // Add ListLayout fragment to MainActivity
             FragmentManager fragmentManager = getSupportFragmentManager();
@@ -253,7 +261,7 @@ public class MainActivity extends AppCompatActivity implements
 
             Bundle bundle = new Bundle();
             bundle.putParcelable("location_obj_list", locationDetail);
-            fragment.setArguments(bundle);
+            fragment.setArguments(bundle); */
         }
     }
 
@@ -324,6 +332,39 @@ public class MainActivity extends AppCompatActivity implements
         @Override
         protected void onPostExecute(String result) {
 
+            try {
+                JSONObject obj = new JSONObject(result);
+                JSONArray jArray = obj.getJSONArray("results");
+                List<locationObj> locationList = new ArrayList<>();
+
+                for (int i = 0; i < jArray.length(); i++){
+                    JSONObject jObject = jArray.getJSONObject(i);
+                    JSONObject geometryObj = jObject.getJSONObject("geometry");
+                    JSONObject lObj = geometryObj.getJSONObject("location");
+
+                    locationObj LocationObj = new locationObj(0, jObject.getString("name"), 1, 4, 5, "blah blah",
+                            jObject.getString("vicinity"), "wheneva", lObj.getDouble("lat"), lObj.getDouble("lng"));
+
+                    locationList.add(LocationObj);
+                }
+
+                locationObjParcelable locationDetail = new locationObjParcelable(locationList);
+
+                // Add ListLayout fragment to MainActivity
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+                ListLayoutFragment fragment = new ListLayoutFragment();
+                fragmentTransaction.add(R.id.mainLayout, fragment);
+                fragmentTransaction.commit();
+
+                Bundle bundle = new Bundle();
+                bundle.putParcelable("location_obj_list", locationDetail);
+                fragment.setArguments(bundle);
+            }
+            catch(JSONException e){
+
+            }
         }
     }
 }
