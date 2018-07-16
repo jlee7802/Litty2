@@ -136,7 +136,7 @@ public class ListLayoutFragment extends Fragment implements OnMapReadyCallback {
                 float[] distance = new float[1];
                 Location.distanceBetween(40.762954, -73.9712007,location.locationLat(), location.locationLong(),distance); // Need to get the users lat/long data for the first 2 params
                 TextView distanceTV = new TextView(getContext());
-                distanceTV.setText(String.valueOf(round(getMiles((Double.valueOf(distance[0])) * 100.0 / 100.0)))); // multiply meters by 0.000621371192 to convert meters to miles
+                distanceTV.setText(String.valueOf(round(getMiles((distance[0] * 100.0) / 100.0)))); // multiply meters by 0.000621371192 to convert meters to miles
                 distanceTV.setTextColor(Color.WHITE);
                 distanceTV.setTag("distanceTV");
                 distanceTV.setLayoutParams(distanceParams);
@@ -230,12 +230,13 @@ public class ListLayoutFragment extends Fragment implements OnMapReadyCallback {
     public void onMapReady(GoogleMap googleMap) {
         // Add a marker in Sydney, Australia,
         // and move the map's camera to the same location.
-        LatLng sydney = new LatLng(currLocObj.locationLat(), currLocObj.locationLong());
+        LatLng loc = new LatLng(currLocObj.locationLat(), currLocObj.locationLong());
         if (ContextCompat.checkSelfPermission( getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION ) == PackageManager.PERMISSION_GRANTED )
             googleMap.setMyLocationEnabled(true);
-        googleMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+        googleMap.addMarker(new MarkerOptions().position(loc).title("Marker in Sydney"));
 
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        float zoomLevel = 16.0f;
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(loc, zoomLevel));
     }
 
     // Convert meters to miles

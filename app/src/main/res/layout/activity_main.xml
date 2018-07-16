@@ -169,14 +169,29 @@ android:padding="6dip"
     </LinearLayout>
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/listLayout"
+        android:id="@+id/bottomLayout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="0dp"
         android:padding="6dip"
         android:layout_weight="2"
+        android:clickable="false"
         tools:context=".MainActivity">
 
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clickable="false">
+            <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:id="@+id/listLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="0dp"
+                android:padding="6dip"
+                tools:context=".MainActivity">
+            </RelativeLayout>
+        </ScrollView>
 
     </RelativeLayout>
 

@@ -57,6 +57,10 @@ import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -124,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements
                     l.setLatitude(40.7630525);
                     l.setLongitude(-73.9721337);
                     new locationTask(MainActivity.this, l).execute(uLocation);
-                    getGoogleMapsData(l);
+                    //getGoogleMapsData(l);
                 }
             };
 
@@ -249,7 +253,7 @@ public class MainActivity extends AppCompatActivity implements
 
             // Use this if i need to pull the mfCount from our database in order to populate
             // some of the fields in the locationObj. - JL
-          /*  locationObjParcelable locationDetail = new locationObjParcelable(result);
+            locationObjParcelable locationDetail = new locationObjParcelable(result);
 
             // Add ListLayout fragment to MainActivity
             FragmentManager fragmentManager = getSupportFragmentManager();
@@ -261,7 +265,7 @@ public class MainActivity extends AppCompatActivity implements
 
             Bundle bundle = new Bundle();
             bundle.putParcelable("location_obj_list", locationDetail);
-            fragment.setArguments(bundle); */
+            fragment.setArguments(bundle);
         }
     }
 
@@ -333,6 +337,19 @@ public class MainActivity extends AppCompatActivity implements
         protected void onPostExecute(String result) {
 
             try {
+                String endpoint = "";
+                String port = "";
+                String db_name = "";
+                String username = "";
+                String pw = "***REMOVED***";
+                String url = "jdbc:postgresql://" + endpoint + ":" + port + "/" + db_name + "?user=" + username + "&password=" + pw;
+
+                Class.forName("org.postgresql.Driver");
+                Connection conn = DriverManager.getConnection(url);
+                Statement stmt = conn.createStatement();
+
+
+
                 JSONObject obj = new JSONObject(result);
                 JSONArray jArray = obj.getJSONArray("results");
                 List<locationObj> locationList = new ArrayList<>();
@@ -346,12 +363,17 @@ public class MainActivity extends AppCompatActivity implements
                             jObject.getString("vicinity"), "wheneva", lObj.getDouble("lat"), lObj.getDouble("lng"));
 
                     locationList.add(LocationObj);
+
+
+                    String query = "INSERT INTO location VALUES (nextval('location_location_id_seq'), " +
+                            jObject.getString("name") + "1, 0, 0, '', 0, " + jObject.getString("vicinity") + ", '', " + lObj.getDouble("lat") + ", " + lObj.getDouble("lng") + ")";
+                    stmt.executeQuery(query);
                 }
 
                 locationObjParcelable locationDetail = new locationObjParcelable(locationList);
 
                 // Add ListLayout fragment to MainActivity
-                FragmentManager fragmentManager = getSupportFragmentManager();
+                /*FragmentManager fragmentManager = getSupportFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
                 ListLayoutFragment fragment = new ListLayoutFragment();
@@ -360,9 +382,15 @@ public class MainActivity extends AppCompatActivity implements
 
                 Bundle bundle = new Bundle();
                 bundle.putParcelable("location_obj_list", locationDetail);
-                fragment.setArguments(bundle);
+                fragment.setArguments(bundle);*/
             }
             catch(JSONException e){
+
+            }
+            catch(SQLException e){
+
+            }
+            catch(ClassNotFoundException e) {
 
             }
         }
