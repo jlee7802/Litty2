@@ -93,7 +93,7 @@ public class ListLayoutFragment extends Fragment implements OnMapReadyCallback {
 
                 GradientDrawable gd = new GradientDrawable();
                 gd.setCornerRadius(10);
-                gd.setStroke(5, Color.WHITE);
+                gd.setStroke(5, Color.parseColor("#946bff"));
 
                 listLayout.setBackgroundColor(Color.BLACK);
                 listLayoutItem.setBackground(gd);
