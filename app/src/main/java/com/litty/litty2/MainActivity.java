@@ -328,10 +328,10 @@ public class MainActivity extends AppCompatActivity implements
                 String result = buffer.toString();
 
                 String endpoint = "";
-                String port = "";
+                String port = "5432";
                 String db_name = "";
                 String username = "";
-                String pw = "***REMOVED***";
+                String pw = "";
                 String urls = "jdbc:postgresql://" + endpoint + ":" + port + "/" + db_name + "?user=" + username + "&password=" + pw;
 
                 Class.forName("org.postgresql.Driver");
@@ -412,10 +412,10 @@ public class MainActivity extends AppCompatActivity implements
 
             try {
                 String endpoint = "";
-                String port = "";
+                String port = "5432";
                 String db_name = "";
                 String username = "";
-                String pw = "***REMOVED***";
+                String pw = ";
                 String url = "jdbc:postgresql://" + endpoint + ":" + port + "/" + db_name + "?user=" + username + "&password=" + pw;
 
                 Class.forName("org.postgresql.Driver");
