@@ -281,6 +281,18 @@ public class MainActivity extends AppCompatActivity implements
         new JsonTask().execute(String.valueOf(sb));
     }
 
+    protected void getGoogleMapsData(Location location, String nextPageToken) {
+        StringBuilder sb = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
+        sb.append("location=" + location.getLatitude() + "," + location.getLongitude());
+        sb.append("&rankby=distance");
+        sb.append("&types=" + "night_club");
+        sb.append("&sensor=true");
+        sb.append("&pagetoken=" + nextPageToken);
+        sb.append("&key=AIzaSyCbtL331iP2ok4j8ZMwi4A7LrIhFCDvqnk");
+
+        new JsonTask().execute(String.valueOf(sb));
+    }
+
     private class JsonTask extends AsyncTask<String, String, String> {
 
         protected void onPreExecute() {
@@ -312,9 +324,71 @@ public class MainActivity extends AppCompatActivity implements
 
                 }
 
+                connection.disconnect();
+                String result = buffer.toString();
+
+                String endpoint = "litty.cgbqmmmv1tjp.us-east-1.rds.amazonaws.com";
+                String port = "5432";
+                String db_name = "Litty";
+                String username = "jlee";
+                String pw = "103190jJ";
+                String urls = "jdbc:postgresql://" + endpoint + ":" + port + "/" + db_name + "?user=" + username + "&password=" + pw;
+
+                Class.forName("org.postgresql.Driver");
+                Connection conn = DriverManager.getConnection(urls);
+                Statement stmt = conn.createStatement();
+
+
+                JSONObject obj = new JSONObject(result);
+                JSONArray jArray = obj.getJSONArray("results");
+                List<locationObj> locationList = new ArrayList<>();
+
+
+                String nextPageToken = obj.has("next_page_token") ? obj.getString("next_page_token") : "";
+
+                for (int i = 0; i < jArray.length(); i++) {
+                    JSONObject jObject = jArray.getJSONObject(i);
+                    JSONObject geometryObj = jObject.getJSONObject("geometry");
+                    JSONObject lObj = geometryObj.getJSONObject("location");
+                    JSONObject pObj = jObject.getJSONObject("plus_code");
+
+                    locationObj LocationObj = new locationObj(0, jObject.getString("name"), 1, 4, 5, "blah blah",
+                            jObject.getString("vicinity"), "wheneva", lObj.getDouble("lat"), lObj.getDouble("lng"));
+
+                    locationList.add(LocationObj);
+
+                    String placeName = jObject.getString("name");
+                    if (placeName.contains("'"))
+                        placeName = placeName.replace("'","''");
+
+                    String query = "INSERT INTO location VALUES (nextval('location_location_id_seq'), '" +
+                            placeName + "', 1, 0, 0, '', 0, '" + jObject.getString("vicinity") + "', '', " + lObj.getDouble("lat") + ", " + lObj.getDouble("lng") + ", '" +
+                            jObject.getString("place_id") + "', '" + pObj.getString("compound_code") + "', '" + pObj.getString("global_code") + "')";
+                    stmt.executeUpdate(query);
+                }
+
+                locationObjParcelable locationDetail = new locationObjParcelable(locationList);
+
+
+                conn.close();
+                stmt.close();
+
+                Location l = new Location("");
+                l.setLatitude(40.7630525);
+                l.setLongitude(-73.9721337);
+
+                if (!nextPageToken.equals(""))
+                    getGoogleMapsData(l, nextPageToken);
+
                 return buffer.toString();
 
             } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e ){
+                e.printStackTrace();
+            } catch (SQLException e ){
+                e.printStackTrace();
+            } catch (JSONException e ){
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -333,7 +407,7 @@ public class MainActivity extends AppCompatActivity implements
             return null;
         }
 
-        @Override
+     /*   @Override
         protected void onPostExecute(String result) {
 
             try {
@@ -349,28 +423,46 @@ public class MainActivity extends AppCompatActivity implements
                 Statement stmt = conn.createStatement();
 
 
-
                 JSONObject obj = new JSONObject(result);
                 JSONArray jArray = obj.getJSONArray("results");
-                List<locationObj> locationList = new ArrayList<>();
-
-                for (int i = 0; i < jArray.length(); i++){
-                    JSONObject jObject = jArray.getJSONObject(i);
-                    JSONObject geometryObj = jObject.getJSONObject("geometry");
-                    JSONObject lObj = geometryObj.getJSONObject("location");
-
-                    locationObj LocationObj = new locationObj(0, jObject.getString("name"), 1, 4, 5, "blah blah",
-                            jObject.getString("vicinity"), "wheneva", lObj.getDouble("lat"), lObj.getDouble("lng"));
-
-                    locationList.add(LocationObj);
+                List<locationObj> locationList = new ArrayList<>();*/
 
 
-                    String query = "INSERT INTO location VALUES (nextval('location_location_id_seq'), " +
-                            jObject.getString("name") + "1, 0, 0, '', 0, " + jObject.getString("vicinity") + ", '', " + lObj.getDouble("lat") + ", " + lObj.getDouble("lng") + ")";
-                    stmt.executeQuery(query);
-                }
+                //while (nextPageToken != null || nextPageToken.equals("")) {
+            /*        String nextPageToken = obj.getString("next_page_token");
 
-                locationObjParcelable locationDetail = new locationObjParcelable(locationList);
+                    for (int i = 0; i < jArray.length(); i++) {
+                        JSONObject jObject = jArray.getJSONObject(i);
+                        JSONObject geometryObj = jObject.getJSONObject("geometry");
+                        JSONObject lObj = geometryObj.getJSONObject("location");
+                        JSONObject pObj = jObject.getJSONObject("plus_code");
+
+                        locationObj LocationObj = new locationObj(0, jObject.getString("name"), 1, 4, 5, "blah blah",
+                                jObject.getString("vicinity"), "wheneva", lObj.getDouble("lat"), lObj.getDouble("lng"));
+
+                        locationList.add(LocationObj);
+
+
+                        String query = "INSERT INTO location VALUES (nextval('location_location_id_seq'), " +
+                                jObject.getString("name") + "1, 0, 0, '', 0, " + jObject.getString("vicinity") + ", '', " + lObj.getDouble("lat") + ", " + lObj.getDouble("lng") + ", " +
+                                jObject.getString("place_id") + ", " + pObj.getString("compound_code") + ", " + pObj.getString("global_code") + ")";
+                        stmt.executeQuery(query);
+                    }*/
+                //}
+
+             /*   locationObjParcelable locationDetail = new locationObjParcelable(locationList);
+
+
+                conn.close();
+                stmt.close();
+
+                Location l = new Location("");
+                l.setLatitude(40.7630525);
+                l.setLongitude(-73.9721337);
+
+                if (nextPageToken != null && nextPageToken.equals(""))
+                    getGoogleMapsData(l, nextPageToken);*/
+
 
                 // Add ListLayout fragment to MainActivity
                 /*FragmentManager fragmentManager = getSupportFragmentManager();
@@ -383,9 +475,9 @@ public class MainActivity extends AppCompatActivity implements
                 Bundle bundle = new Bundle();
                 bundle.putParcelable("location_obj_list", locationDetail);
                 fragment.setArguments(bundle);*/
-            }
+      /*      }
             catch(JSONException e){
-
+                String mes = e.getMessage();
             }
             catch(SQLException e){
 
@@ -393,6 +485,6 @@ public class MainActivity extends AppCompatActivity implements
             catch(ClassNotFoundException e) {
 
             }
-        }
+        }*/
     }
 }
