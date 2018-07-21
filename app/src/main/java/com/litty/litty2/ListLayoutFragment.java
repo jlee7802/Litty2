@@ -7,6 +7,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -98,6 +99,7 @@ public class ListLayoutFragment extends Fragment implements OnMapReadyCallback {
                 listLayout.setBackgroundColor(Color.BLACK);
                 listLayoutItem.setBackground(gd);
                 listLayoutItem.setId(layoutId);
+                listLayout.setPadding(7, 10,7,10);
 
                 listLayoutItem.setLayoutParams(liParams);
                 listLayout.addView(listLayoutItem);
@@ -105,17 +107,17 @@ public class ListLayoutFragment extends Fragment implements OnMapReadyCallback {
                 // Add image and text for List item.
                 RelativeLayout layout = view.findViewById(R.id.listLayout); // Do i need this? can't i just use the input parameter
                 int liWidth  = layout.getMeasuredWidth();
-                int imageWidth = liWidth/4;
+                int oneWidth = liWidth/4;
 
-                RelativeLayout.LayoutParams mapParams = new RelativeLayout.LayoutParams(imageWidth, ViewGroup.LayoutParams.MATCH_PARENT);
-                RelativeLayout.LayoutParams textTitleParams = new RelativeLayout.LayoutParams(liWidth/2, ViewGroup.LayoutParams.MATCH_PARENT);
-                RelativeLayout.LayoutParams textDescParams = new RelativeLayout.LayoutParams(liWidth/2, ViewGroup.LayoutParams.MATCH_PARENT);
-                RelativeLayout.LayoutParams distanceParams = new RelativeLayout.LayoutParams(imageWidth, ViewGroup.LayoutParams.MATCH_PARENT);
+                //RelativeLayout.LayoutParams mapParams = new RelativeLayout.LayoutParams(imageWidth, ViewGroup.LayoutParams.MATCH_PARENT);
+                RelativeLayout.LayoutParams textTitleParams = new RelativeLayout.LayoutParams(oneWidth*3, ViewGroup.LayoutParams.MATCH_PARENT);
+                RelativeLayout.LayoutParams textDescParams = new RelativeLayout.LayoutParams(oneWidth*3, ViewGroup.LayoutParams.MATCH_PARENT);
+                RelativeLayout.LayoutParams distanceParams = new RelativeLayout.LayoutParams(oneWidth, ViewGroup.LayoutParams.MATCH_PARENT);
 
-                mapParams.setMargins(8,21,8,21);
-                textTitleParams.setMargins(imageWidth + 100, 20, 8, 130);
-                textDescParams.setMargins(imageWidth + 100, 100, 8, 30);
-                distanceParams.setMargins(imageWidth*3, 21, 8, 21);
+                //mapParams.setMargins(8,21,8,21);
+                //textTitleParams.setMargins(imageWidth + 100, 20, 8, 130);
+                //textDescParams.setMargins(imageWidth + 100, 100, 8, 30);
+                distanceParams.setMargins(oneWidth*3, 21, 8, 21);
 
                 TextView titleTV = new TextView(getContext());
                 titleTV.setText(location.locationName());
@@ -123,6 +125,9 @@ public class ListLayoutFragment extends Fragment implements OnMapReadyCallback {
                 titleTV.setTextSize(20);
                 titleTV.setTag("titleTV");
                 titleTV.setLayoutParams(textTitleParams);
+                titleTV.setGravity(Gravity.START|Gravity.TOP);
+                titleTV.setSingleLine(true);
+                titleTV.setEllipsize(TextUtils.TruncateAt.END);
                 listLayoutItem.addView(titleTV);
 
                 TextView descTV = new TextView(getContext());
@@ -130,16 +135,20 @@ public class ListLayoutFragment extends Fragment implements OnMapReadyCallback {
                 descTV.setTextColor(Color.WHITE);
                 descTV.setTag("descTV");
                 descTV.setLayoutParams(textDescParams);
+                descTV.setGravity(Gravity.START|Gravity.CENTER_VERTICAL);
+                descTV.setSingleLine(false);
+                descTV.setEllipsize(TextUtils.TruncateAt.END);
                 listLayoutItem.addView(descTV);
 
                 //Calculate distance between user and each location in locationList
                 float[] distance = new float[1];
                 Location.distanceBetween(40.762954, -73.9712007,location.locationLat(), location.locationLong(),distance); // Need to get the users lat/long data for the first 2 params
                 TextView distanceTV = new TextView(getContext());
-                distanceTV.setText(String.valueOf(round(getMiles((distance[0] * 100.0) / 100.0)))); // multiply meters by 0.000621371192 to convert meters to miles
+                distanceTV.setText(String.valueOf(Math.round(getMiles(distance[0]) * 100) /100.0)); // multiply meters by 0.000621371192 to convert meters to miles
                 distanceTV.setTextColor(Color.WHITE);
                 distanceTV.setTag("distanceTV");
                 distanceTV.setLayoutParams(distanceParams);
+                distanceTV.setGravity(Gravity.CENTER|Gravity.CENTER_VERTICAL);
                 listLayoutItem.addView(distanceTV);
 
                 TextView idTV = new TextView(getContext());
