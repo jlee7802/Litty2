@@ -201,20 +201,18 @@ public class ListLayoutFragment extends Fragment implements OnMapReadyCallback {
                     TextView maleTV = view.findViewById(R.id.maleTV);
                     TextView femaleTV = view.findViewById(R.id.femaleTV);
                     TextView addressTV = view.findViewById(R.id.addressTV);
-                    TextView businessHoursTV = view.findViewById(R.id.businessHoursTV);
 
                     titleTV.setText(currLocObj.locationName());
                     descTV.setText(currLocObj.locationDesc());
+
+                    long mCount = round(((double)currLocObj.mCount()/(double)currLocObj.mfCount())*100);
                     maleTV.setText(String.valueOf(round(((double)currLocObj.mCount()/(double)currLocObj.mfCount())*100)));
-                    femaleTV.setText(String.valueOf(round(((double)currLocObj.fCount()/(double)currLocObj.mfCount())*100)));
+                    femaleTV.setText(String.valueOf(Math.abs(mCount - 100)));
                     addressTV.setText(currLocObj.address());
-                    businessHoursTV.setText(currLocObj.businessHours());
 
                     RelativeLayout rlTitle = view.findViewById(R.id.descriptionLayout_title);
                     RelativeLayout rlDesc = view.findViewById(R.id.descriptionLayout_desc);
                     RelativeLayout rlLocationDetail = view.findViewById(R.id.descriptionLayout_locationDetail);
-                    RelativeLayout rlRace = view.findViewById(R.id.descriptionLayout_race);
-                    RelativeLayout rlAge = view.findViewById(R.id.descriptionLayout_age);
                     RelativeLayout rlGender = view.findViewById(R.id.descriptionLayout_gender);
 
                     return true;

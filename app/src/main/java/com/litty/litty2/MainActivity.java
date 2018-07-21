@@ -328,7 +328,7 @@ public class MainActivity extends AppCompatActivity implements
                 String result = buffer.toString();
 
                 String endpoint = "";
-                String port = "5432";
+                String port = "";
                 String db_name = "";
                 String username = "";
                 String pw = "";
@@ -411,11 +411,11 @@ public class MainActivity extends AppCompatActivity implements
         protected void onPostExecute(String result) {
 
             try {
-                String endpoint = "";
-                String port = "5432";
+                String endpoint = ";
+                String port = "";
                 String db_name = "";
                 String username = "";
-                String pw = ";
+                String pw = "";
                 String url = "jdbc:postgresql://" + endpoint + ":" + port + "/" + db_name + "?user=" + username + "&password=" + pw;
 
                 Class.forName("org.postgresql.Driver");
