@@ -99,7 +99,7 @@ public class ListLayoutFragment extends Fragment implements OnMapReadyCallback {
                 listLayout.setBackgroundColor(Color.BLACK);
                 listLayoutItem.setBackground(gd);
                 listLayoutItem.setId(layoutId);
-                listLayout.setPadding(7, 10,7,10);
+                listLayout.setPadding(5, 7,5,7);
 
                 listLayoutItem.setLayoutParams(liParams);
                 listLayout.addView(listLayoutItem);
@@ -115,8 +115,8 @@ public class ListLayoutFragment extends Fragment implements OnMapReadyCallback {
                 RelativeLayout.LayoutParams distanceParams = new RelativeLayout.LayoutParams(oneWidth, ViewGroup.LayoutParams.MATCH_PARENT);
 
                 //mapParams.setMargins(8,21,8,21);
-                //textTitleParams.setMargins(imageWidth + 100, 20, 8, 130);
-                //textDescParams.setMargins(imageWidth + 100, 100, 8, 30);
+                textTitleParams.setMargins(22, 12, 22, 12);
+                textDescParams.setMargins(22, 12, 22, 12);
                 distanceParams.setMargins(oneWidth*3, 21, 8, 21);
 
                 TextView titleTV = new TextView(getContext());
