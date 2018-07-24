@@ -1,17 +1,11 @@
 package com.litty.litty2;
 
-import android.app.ProgressDialog;
-import android.content.Intent;
 import android.graphics.Color;
-import android.location.Address;
 import android.location.Location;
 import android.os.AsyncTask;
-import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.app.JobIntentService;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -19,7 +13,6 @@ import android.Manifest;
 import android.util.Log;
 import android.content.pm.PackageManager;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import static android.os.Debug.waitForDebugger;
 

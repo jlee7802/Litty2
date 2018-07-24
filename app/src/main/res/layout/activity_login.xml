@@ -114,6 +114,7 @@
             android:layout_marginTop="548dp"
             android:text="Register Here"
             android:textColor="@android:color/white"
+            android:onClick="goToRegisterActivity"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.498"
             app:layout_constraintStart_toStartOf="parent"

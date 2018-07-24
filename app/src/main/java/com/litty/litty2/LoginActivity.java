@@ -74,6 +74,11 @@ public class LoginActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    public void goToRegisterActivity(View view) {
+        Intent intent = new Intent(this, RegisterActivity.class);
+        startActivity(intent);
+    }
+
     // Method to invoke verifyUserLogin lambda function.  verifyUserLogin returns the user_id if user's credentials
     // are found in the database, otherwise it returns zero. - JL
     private static class verifyCredential extends AsyncTask<userCredential, Void, Integer>{
@@ -85,7 +90,7 @@ public class LoginActivity extends AppCompatActivity {
                     context.getApplicationContext(), "us-east-1:caa8736d-fa24-483f-bf6a-4ee5b4da1436", Regions.US_EAST_1);
 
             // Create LambdaInvokerFactory, to be used to instantiate the Lambda proxy.
-            LambdaInvokerFactory factory = new LambdaInvokerFactory(context.getApplicationContext(), Regions.US_EAST_1, credentialsProvider);
+            LambdaInvokerFactory factory = LambdaInvokerFactory.builder().context(context).region(Regions.US_EAST_1).credentialsProvider(credentialsProvider) .build();
 
             // Create the Lambda proxy object with default Json data binder.
             // You can provide your own data binder by implementing
