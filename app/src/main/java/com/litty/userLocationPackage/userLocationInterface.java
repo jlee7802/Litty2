@@ -13,4 +13,7 @@ public interface userLocationInterface {
 
     @LambdaFunction
     List<locationObj> getTopMFCountLocations();
+
+    @LambdaFunction
+    Void registerUser(registerInfo registerInfoObj);
 }

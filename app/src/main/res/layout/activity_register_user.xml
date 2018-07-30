@@ -8,7 +8,7 @@
     android:layout_height="match_parent"
     tools:context=".RegisterActivity"
     android:orientation="vertical"
-    android:background="#040011">
+    android:background="#303030">
 
     <EditText
         android:id="@+id/emailText"

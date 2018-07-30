@@ -1,16 +1,16 @@
 package com.litty.userLocationPackage;
 
 public class userCredential {
-    private String username;
+    private String email;
     private String password;
 
-    public userCredential(String username, String password) {
-        this.username = username;
+    public userCredential(String email, String password) {
+        this.email = email;
         this.password = password;
     }
 
-    public String getUsername() {
-        return username;
+    public String getEmail() {
+        return email;
     }
 
     public String getPassword() {
