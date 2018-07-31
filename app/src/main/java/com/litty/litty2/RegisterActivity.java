@@ -1,16 +1,24 @@
 package com.litty.litty2;
 
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.content.DialogInterface;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.CheckBox;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
 import com.amazonaws.mobileconnectors.lambdainvoker.LambdaFunctionException;
@@ -36,7 +44,58 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_register_user);
 
         edittext = findViewById(R.id.DOB);
+        Spinner dropdown = findViewById(R.id.spinner1);
+        String[] items = new String[]{"123", "blue", "cow"};
 
+        final ArrayAdapter<String> sprache_ratoromanisch_adapter = new ArrayAdapter<String>(
+                        RegisterActivity.this,
+                        android.R.layout.simple_spinner_item,
+                        items) {
+
+            @Override
+            public boolean isEnabled(int position) {
+                if (position == 0) {
+                    // Disable the first item from Spinner
+                    // First item will be use for hint
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+
+                    @Override
+                    public View getDropDownView(int position, View convertView, ViewGroup parent) {
+                        View view = super.getDropDownView(position, convertView, parent);
+                        TextView tv = (TextView) view;
+                        if (position == 0) {
+                            // Set the hint text color gray
+                            tv.setTextColor(Color.GRAY);
+                        } else {
+                            tv.setTextColor(Color.BLACK);
+                        }
+                        return view;
+                    }
+            };
+
+        dropdown.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String selectedItemText = (String) parent.getItemAtPosition(position);
+                // If user change the default selection
+                // First item is disable and it is used for hint
+                if (position > 0) {
+                    // Notify the selected item text
+                    Toast.makeText(getApplicationContext(), "Selected : " + selectedItemText, Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        // Create listener for date eddittext so that a date picker dialog box appears when the user clicks on the edittext
         final DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
 
             @Override
@@ -73,25 +132,33 @@ public class RegisterActivity extends AppCompatActivity {
         EditText email = findViewById(R.id.emailText);
         EditText dob = findViewById(R.id.DOB);
         RadioGroup gender = findViewById(R.id.radioGender);
-        CheckBox asian = findViewById(R.id.chkAsian);
-        CheckBox caucasion = findViewById(R.id.chkCaucasian);
-        CheckBox africa = findViewById(R.id.chkAfricanAmerican);
-        CheckBox latin = findViewById(R.id.chkLatinAmerican);
         EditText password = findViewById(R.id.passwordText);
         EditText confirmPassword = findViewById(R.id.confirmPasswordText);
 
         RadioButton genderRD = findViewById(gender.getCheckedRadioButtonId());
 
-        // Need logic to parse the Date edit text to a string format of "dd MMM yyyy" in order to parse it to a local date. Use switch statement here.
-
-        try {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy");
-            regInfo = new registerInfo(email.getText().toString(), LocalDate.parse(dob.getText().toString(), formatter), 1, 1, password.getText().toString(), confirmPassword.getText().toString());
-            new registerUser(RegisterActivity.this).execute(regInfo).get();
+        if (password.getText() != confirmPassword.getText())
+        {
+            AlertDialog alertDialog = new AlertDialog.Builder(RegisterActivity.this).create();
+            alertDialog.setTitle("Password");
+            alertDialog.setMessage("Password and Confirm Password must be the same.");
+            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+            alertDialog.show();
         }
-        catch(Exception e){
-            // Handle exception here.
-            String s = e.getMessage();
+        else {
+            try {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy");
+                regInfo = new registerInfo(email.getText().toString(), LocalDate.parse(dob.getText().toString(), formatter), 1, 1, password.getText().toString(), confirmPassword.getText().toString());
+                new registerUser(RegisterActivity.this).execute(regInfo).get();
+            } catch (Exception e) {
+                // Handle exception here.
+                String s = e.getMessage();
+            }
         }
     }
 

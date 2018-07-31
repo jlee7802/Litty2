@@ -2,7 +2,7 @@
 <!--  res/drawable/rounded_edittext.xml -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle" android:padding="10dp">
-    <solid android:color="#4a3c75"/>
+    <solid android:color="#946bff"/>
     <corners
         android:bottomRightRadius="30dp"
         android:bottomLeftRadius="30dp"
